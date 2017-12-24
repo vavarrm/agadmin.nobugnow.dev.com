@@ -20,10 +20,10 @@ class Mysmarty
 	
 	public function display($tpl)
 	{
-
+		$website = $this->CI->config->item('website');
 		$this->assign(array(
 			'randseed'	=>$this->randseed,
-			'config'	=>$config
+			'website'	=>$website
 		));
 		$this->smarty->clearAllCache();
 		$this->smarty->display($tpl);
@@ -31,17 +31,17 @@ class Mysmarty
 	
 	public function display_index()
 	{
-
+		$website = $this->CI->config->item('website');
 		$this->assign(array(
 			'randseed'	=>$this->randseed,
-			'config'	=>$config
+			'website'	=>$website
 		));
 		$this->smarty->clearAllCache();
 		$this->smarty->display('');
 	}
 
 	
-	public function displayFrame($frame='Frontend/frame.tpl',$tpl="")
+	public function displayFrame($frame='Admin/frame.tpl',$tpl="")
 	{
 		$website = $this->CI->config->item('website');
 		$this->assign(array(

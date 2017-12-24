@@ -513,5 +513,5 @@ $config['rewrite_short_tags'] = FALSE;
 */
 $config['proxy_ips'] = '';
 $config['website'] =array(
-	'title' =>'ag真人平台'
+	'title' =>'ag平台後台'
 );
