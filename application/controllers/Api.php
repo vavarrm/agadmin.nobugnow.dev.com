@@ -13,6 +13,7 @@ class Api extends CI_Controller {
 		$get = $this->input->get();
 		$this->request = json_decode(trim(file_get_contents('php://input'), 'r'), true);
 		$this->load->model('Admin_Model', 'admin');
+		$this->load->model('User_Model', 'user');
 
 		$output['status'] = 100;
 		$output['body'] =array();
@@ -90,6 +91,281 @@ class Api extends CI_Controller {
 		try 
 		{
 			$this->user->insert();
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function addChildUser()
+	{
+		$output['status'] = '100';
+		$output['message'] = '註冊成功'; 
+		$output['body'] =array();
+		$output['title'] ='註冊總代用戶';	
+		try 
+		{
+			if(
+				$this->request['name']	==""|| 
+				$this->request['account']	==""|| 
+				$this->request['passwd']	=="" ||
+				$this->request['superior']	=="" 
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if(strlen($this->request['name']) <8 || strlen($this->request['name'])>12){
+				$array = array(
+					'message' 	=>'暱稱長度為8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if(strlen($this->request['account']) <8 || strlen($this->request['account'])>12){
+				$array = array(
+					'message' 	=>'帳號長度為8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if(strlen($this->request['passwd']) <8 || strlen($this->request['passwd'])>12){
+				$array = array(
+					'message' 	=>'密碼長度為8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if($this->request['name'] == $this->request['account']){
+				$array = array(
+					'message' 	=>'使用者名稱不能與帳號相同' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			
+			$accountIsExist = $this->user->accountIsExist($this->request['account']);
+			if($accountIsExist ==1)
+			{
+				$array = array(
+					'message' 	=>'使用者帳號已存在' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			$ary =array(
+				'superior_id'	=>$this->request['superior'],
+				'u_name'		=>$this->request['name'],
+				'u_account'		=>$this->request['account'],
+				'u_passwd'		=>md5($this->request['passwd']),
+			);
+			
+			$this->user->insert($ary);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$this->myLog->error_log($parames);
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+		}
+		
+		$this->response($output);
+	}
+	
+	public function addParentUser()
+	{
+		$output['status'] = '100';
+		$output['message'] = '註冊成功'; 
+		$output['body'] =array();
+		$output['title'] ='註冊總代用戶';	
+		try 
+		{
+			if(
+				$this->request['name']	==""|| 
+				$this->request['account']	==""|| 
+				$this->request['passwd']	=="" ||
+				$this->request['superior']	=="" 
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if(strlen($this->request['name']) <8 || strlen($this->request['name'])>12){
+				$array = array(
+					'message' 	=>'暱稱長度為8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if(strlen($this->request['account']) <8 || strlen($this->request['account'])>12){
+				$array = array(
+					'message' 	=>'帳號長度為8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if(strlen($this->request['passwd']) <8 || strlen($this->request['passwd'])>12){
+				$array = array(
+					'message' 	=>'密碼長度為8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if($this->request['name'] == $this->request['account']){
+				$array = array(
+					'message' 	=>'使用者名稱不能與帳號相同' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			
+			$accountIsExist = $this->user->accountIsExist($this->request['account']);
+			if($accountIsExist ==1)
+			{
+				$array = array(
+					'message' 	=>'使用者帳號已存在' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			$ary =array(
+				'superior_id'	=>$this->request['superior'],
+				'u_name'		=>$this->request['name'],
+				'u_account'		=>$this->request['account'],
+				'u_passwd'		=>md5($this->request['passwd']),
+			);
+			
+			$this->user->insert($ary);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$this->myLog->error_log($parames);
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+		}
+		
+		$this->response($output);
+	}
+	
+	public function userList()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='使用者列表';
+		$output['message'] = '成功取得';
+		$ary['limit'] = (isset($this->request['limit']))?$this->request['limit']:5;
+		$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
+		$ary['u.u_superior_id'] = (isset($this->request['superior_id']))?$this->request['superior_id']:0;
+		try 
+		{
+			$output['body'] = $this->user->getList($ary);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	private function createTree(&$list, $parent)
+	{
+		$tree = array();
+		foreach ($parent as $k=>$l)
+		{
+			if(isset($list[$l['id']]))
+			{
+				$l['nodes'] = $this->createTree($list, $list[$l['id']]);
+			}
+			$tree[] = $l;
+		} 
+		return $tree;
+	}
+	
+	public function getMenu()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得權限表單';
+		$output['message'] = '成功';
+		
+		try 
+		{
+
+			$arr = $this->admin->getMenu();
+			$new = array();
+			foreach ($arr as $value){
+				$new[$value['parent_id']][] = $value;
+			}
+			$tree = $this->createTree($new, $new[0]);
+			$output['body']['menulist']= $tree;
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();
@@ -185,7 +461,7 @@ class Api extends CI_Controller {
 				$MyException->setParams($array);
 				throw $MyException;
 			}	
-			$row = $this->user->getUesrByAccount($this->request['account']);
+			$row = $this->admin->getUesrByAccount($this->request['account']);
 			if(empty($row))
 			{
 				$array = array(
@@ -198,7 +474,7 @@ class Api extends CI_Controller {
 				throw $MyException;
 			}
 			
-			if($row['u_passwd'] !=md5($this->request['passwd']))
+			if($row['ad_passwd'] !=md5($this->request['passwd']))
 			{
 				$array = array(
 					'message' 	=>'密碼錯誤' ,

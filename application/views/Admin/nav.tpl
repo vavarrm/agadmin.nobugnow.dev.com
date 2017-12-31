@@ -12,39 +12,25 @@
 	<!-- Brand and toggle get grouped for better mobile display -->
 	<!-- Collect the nav links, forms, and other content for toggling -->
 	<div class="drop-men" >
-		<ul class=" nav_1">
-			<li class="dropdown">
-				<a href="#" class="dropdown-toggle dropdown-at" data-toggle="dropdown">
-					<span class="name-caret">Rackham<i class="caret"></i></span>
-					<img src="images/wo.jpg">
-				</a>
-			  <ul class="dropdown-menu " role="menu">
-				<li><a href="profile.html"><i class="fa fa-user"></i>Edit Profile</a></li>
-				<li><a href="inbox.html"><i class="fa fa-envelope"></i>Inbox</a></li>
-				<li><a href="calendar.html"><i class="fa fa-calendar"></i>Calender</a></li>
-				<li><a href="inbox.html"><i class="fa fa-clipboard"></i>Tasks</a></li>
-			  </ul>
-			</li>
-		</ul>
 	</div><!-- /.navbar-collapse -->
 	<div class="clearfix"></div>
 	<div class="navbar-default sidebar" role="navigation">
 		<div class="sidebar-nav navbar-collapse">
-			<ul class="nav" id="side-menu">
-				<li>
-					<a href="index.html" class=" hvr-bounce-to-right">
-					<i class="fa fa-dashboard nav_icon "></i><span class="nav-label">Dashboards</span> </a>
-				</li>
-				<li>
-					<a href="#" class=" hvr-bounce-to-right"><i class="fa fa-indent nav_icon"></i> <span class="nav-label">Menu Levels</span><span class="fa arrow"></span></a>
-					<ul class="nav nav-second-level">
-						<li><a href="graphs.html" class=" hvr-bounce-to-right"> <i class="fa fa-area-chart nav_icon"></i>Graphs</a></li>
-						
-						<li><a href="maps.html" class=" hvr-bounce-to-right"><i class="fa fa-map-marker nav_icon"></i>Maps</a></li>
-		
-					<li><a href="typography.html" class=" hvr-bounce-to-right"><i class="fa fa-file-text-o nav_icon"></i>Typography</a></li>
-
-				   </ul>
+			<ul class="nav" id="side-menu" ng-init="getMenu()">
+				<li ng-repeat="root in menuList" data-root_id="{{root.id}}" class="menulist" ng-class="data.selected == root.id ?'active':''">
+					<a href="#" class=" hvr-bounce-to-right"  ng-click="menuClick(root.id) ; $event.preventDefault();">
+						<i class="fa  nav_icon" ng-class="root.nodes?'fa-indent':'fa-cog'"></i> 
+						<span class="nav-label" ng-bind="root.title"></span>
+						<span class="fa arrow" ng-show="root.nodes"></span>
+					</a>
+					<ul ng-if="root.nodes" class="nav nav-second-level">
+						<li ng-repeat="nodes in root.nodes">
+							<a  href="/#!{{root.router}}{{nodes.router}}/{{root.id}}/{{nodes.id}}"  class="hvr-bounce-to-right" ng-show="data.selected == root.id" > 
+								<i class="fa fa-cog nav_icon "></i>
+								<span ng-bind="nodes.title"></span>
+							</a>
+						</li>
+					</ul>
 				</li>
 			</ul>
 		</div>

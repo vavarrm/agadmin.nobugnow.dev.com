@@ -16,18 +16,13 @@
 				return false;
 			}
 
-			
-
 			$('#toggle').click(function () {
 				screenfull.toggle($('#container')[0]);
 			});
-			
-
-			
 		});
 	</script>
 </head>
-<body ng-controller="bodyCtrl" ng-init="init()">
+<body ng-controller="bodyCtrl">
 	<div id="wrapper">
 		<{*nav*}>
 		<{include file='Admin/nav.tpl'}>	
@@ -36,10 +31,13 @@
 			<div class="content-main">
 				<{*banner*}>
 				<div class="banner">
-					<h2>
-						<a href="index.html">Home</a>
-						<i class="fa fa-angle-right"></i>
-						<span>Typography</span>
+					<h2 class="hide">
+						<a href="/#!/">Home</a>
+						<i  ng-show="data.nodes.router" class="fa fa-angle-right"></i>
+						<a style="color:#999" href="/#!/user{{data.nodes.router}}/{{data.selected}}/{{data.nodes.id}}" ng-show="data.nodes" ng-bind="data.nodes.title"></a>
+						<i  ng-show="data.action.title" class="fa fa-angle-right"></i>
+						<span  ng-show="data.action.title" ng-bind="data.action.title"></sapn>
+					</h2>
 					</h2>
 				</div>
 				<{*banner*}>
@@ -56,7 +54,6 @@
 		</div>
 		<!--scrolling js-->
 		<script src="/js/jquery.nicescroll.js"></script>
-		<script src="/js/scripts.js"></script>
 		<!--//scrolling js-->
 	</div>
 </body>

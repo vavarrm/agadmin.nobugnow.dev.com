@@ -9,15 +9,14 @@
 		}
 		
 		
-		public function getAdminByAccount($account)
+		
+		
+		public function getMenu()
 		{
-			$sql = "SELECT FROM admin WHERE account = ?";
-			$bind = array(
-				md5($passwd),
-				$uid
-			);
+			$sql ="	SELECT am_id AS id ,am_parent_id AS parent_id, am_router AS router ,am_title AS title 
+					FROM admin_menu ORDER BY parent_id ASC , am_id ASC";
 			$query = $this->db->query($sql, $bind);
-
+			$rows = $query->result_array();
 			$error = $this->db->error();
 			if($error['message'] !="")
 			{
@@ -31,7 +30,31 @@
 				$MyException->setParams($array);
 				throw $MyException;
 			}
-			return $this->db->affected_rows();
+			return 	$rows  ;
+		}
+		
+		public function getUesrByAccount($account)
+		{
+			$sql = "SELECT  * FROM admin WHERE ad_account = ?";
+			$bind = array(
+				$account
+			);
+			$query = $this->db->query($sql, $bind);
+			$row = $query->row_array();
+			$error = $this->db->error();
+			if($error['message'] !="")
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>$error['message'] ,
+					'type' 		=>'db' ,
+					'status'	=>'001'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			return 	$row ;
 		}
 		
 		public function setUserPasswd($passwd, $uid)

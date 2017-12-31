@@ -1,9 +1,13 @@
-﻿<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+﻿<script src="/js/jquery/1.9.1/jquery.min.js"></script>
+<script src="/js/jquery.cookie.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery-ui.min.js"></script>
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.4/angular-route.js"></script>
+<script type="text/javascript" src="/js/angular/angular.min.js"></script>
+<script type="text/javascript" src="/js/angular/angular-route.min.js"></script>
+<script type="text/javascript" src="/js/angular/angular-cookies.min.js"></script>
+
+
   
 <!-- Mainly scripts -->
 <script src="/js/jquery.metisMenu.js"></script>
@@ -26,7 +30,7 @@
   <p></p>
 </div>
  
+<div id="dialog_frame" class="hidden" >
+    <iframe frameborder="0" src="" allowfullscreen width="560"></iframe>
+</div>
 
-
-
-        

@@ -54,6 +54,18 @@
 	<script src="/js/jquery.nicescroll.js"></script>
 	<script src="/js/scripts.js"></script>
 	<script>
+		$('input[name=passwd]').keypress(function (event) {
+			if (event.which === 13)
+			{
+				$('#submit-bit').click();
+			}
+		});
+		$('input[name=account]').keypress(function (event) {
+			if (event.which === 13)
+			{
+				$('#submit-bit').click();
+			}
+		});
 		$('#submit-bit').bind('click', function(){
 			var account = $('input[name=account]').val();
 			var passwd = $('input[name=passwd]').val();
@@ -105,7 +117,17 @@
 				data: JSON.stringify({ "account": account , "passwd" : passwd }),
 				contentType: 'application/json',
 				success: function (request) {
-					console.log(request); 
+					if(request['status'] =='100')
+					{
+						$.cookie('sess', request.body.sess, { path:'/'});
+						window.location ="/";
+					}else
+					{
+						var obj = {
+							message:request['message']
+						};
+						dialog(obj);
+					}
 				}
 			})
 		})
