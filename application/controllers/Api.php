@@ -81,6 +81,48 @@ class Api extends CI_Controller {
 		}
     }
 	
+	private function checkPermissions()
+	{
+		
+	}
+	
+	public function getActionList()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得功能项';
+		$output['message'] = '成功取得功能项目';
+		
+		try 
+		{
+			if(
+				$this->request['am_id']	==""
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			$output['body']['actionlist'] = $this->admin->getActionlist($this->request['am_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	
 	public function test()
 	{
 		$output['status'] = 100;
@@ -310,6 +352,245 @@ class Api extends CI_Controller {
 		$this->response($output);
 	}
 	
+	public function childUserList()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得下级帐号';
+		$output['message'] = '成功取得';
+		try 
+		{
+			if(
+				$this->request['superior_id']	==""
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			$output['body'] = $this->user->getUserListBySuperiorId($this->request['superior_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function getUserByID()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得使用者资料';
+		$output['message'] = '成功取得';
+		try 
+		{
+			if(
+				$this->request['u_id']	==""
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			$output['body']['user'] = $this->user->getUserByID($this->request['u_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function setUserPasswd()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='设定使用者密码';
+		$output['message'] = '成功设定';
+		try 
+		{
+			if(
+				$this->request['u_id']	=="" ||
+				$this->request['passwd']	=="" ||
+				$this->request['passwd_confirm']	=="" 
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			
+			if(
+				$this->request['passwd'] != $this->request['passwd_confirm']
+			){
+				$array = array(
+					'message' 	=>'两次输入密码不一致' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			
+			if(
+				strlen($this->request['passwd']) <8 ||
+				strlen($this->request['passwd']) >12 
+			){
+				$array = array(
+					'message' 	=>'密码长度为8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			$ary = array(
+				'u_passwd' =>$this->request['passwd'],
+				'u_id' =>$this->request['u_id'],
+			);
+			$this->user->setUserPasswd($ary);
+
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function getParentInfo()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得總代資料';
+		$output['message'] = '成功取得';
+		$ary['u_id'] = (isset($this->request['u_id']))?$this->request['u_id']:5;
+	
+		try 
+		{
+			if($ary['u_id']  =="")
+			{
+				$array = array(
+						'message' 	=>'reponse 必傳參數為空' ,
+						'type' 		=>'api' ,
+						'status'	=>'002'
+					);
+					$MyException = new MyException();
+					$MyException->setParams($array);
+					throw $MyException;
+			}
+			// $this->user->getUserByID($ary['u_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function setMoneyPasswd()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='设定使用者資金密码';
+		$output['message'] = '成功设定';
+		try 
+		{
+			if(
+				$this->request['u_id']	=="" ||
+				$this->request['passwd']	=="" ||
+				$this->request['passwd_confirm']	=="" 
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			
+			if(
+				$this->request['passwd'] != $this->request['passwd_confirm']
+			){
+				$array = array(
+					'message' 	=>'两次输入密码不一致' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			
+			if(
+				strlen($this->request['passwd']) <8 ||
+				strlen($this->request['passwd']) >12 
+			){
+				$array = array(
+					'message' 	=>'密码长度为8~12位' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			$ary = array(
+				'u_passwd' =>$this->request['passwd'],
+				'u_id' =>$this->request['u_id'],
+			);
+			$this->user->setUserPasswd($ary);
+
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
 	public function userList()
 	{
 		$output['status'] = 100;
@@ -319,6 +600,11 @@ class Api extends CI_Controller {
 		$ary['limit'] = (isset($this->request['limit']))?$this->request['limit']:5;
 		$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
 		$ary['u.u_superior_id'] = (isset($this->request['superior_id']))?$this->request['superior_id']:0;
+		$ary['u.u_account'] = (isset($this->request['u_account']))?$this->request['u_account']:'';
+		if($ary['u.u_account']  !="")
+		{
+			unset($ary['u.u_superior_id']);
+		}
 		try 
 		{
 			$output['body'] = $this->user->getList($ary);
@@ -397,20 +683,7 @@ class Api extends CI_Controller {
 		try 
 		{
 			
-			
 			$encrypt_admin_data = $this->session->userdata('encrypt_admin_data');
-			
-			if(empty($encrypt_admin_data)){
-				$array = array(
-					'message' 	=>'尚未登入' ,
-					'type' 		=>'api' ,
-					'status'	=>'999'
-				);
-				$MyException = new MyException();
-				$MyException->setParams($array);
-				throw $MyException;
-			}	
-			
 			$decrypt_admin_data= $this->decryptUser($get['sess'], $encrypt_admin_data);
 			unset($this->_user['u_passwd']);
 			$output['body']['user'] = $this->_user ;

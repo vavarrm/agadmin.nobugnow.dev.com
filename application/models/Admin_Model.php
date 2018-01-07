@@ -8,13 +8,77 @@
 			$this->load->database();
 		}
 		
+		public function getNodesRow($am_id)
+		{
+			
+			$sql = "SELECT
+						am_type AS type,
+						am_title AS title,
+						am_router AS router,
+						am_id AS id
+					FROM admin_menu WHERE am_id =?";
+			$bind = array(
+				$am_id
+			);
+			$query = $this->db->query($sql, $bind);
+			$row = $query->row_array();
+			$error = $this->db->error();
+			if($error['message'] !="")
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>$error['message'] ,
+					'type' 		=>'db' ,
+					'status'	=>'001'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			return 	$row  ;
+		}
 		
+		public function getActionlist($am_id)
+		{
+			$sql = "SELECT
+						am_type AS type,
+						am_title AS title,
+						am_router AS router,
+						am_id AS id
+					FROM admin_menu WHERE am_parent_id =?";
+			$bind = array(
+				$am_id
+			);
+			$query = $this->db->query($sql, $bind);
+			$rows = $query->result_array();
+			$error = $this->db->error();
+			if($error['message'] !="")
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>$error['message'] ,
+					'type' 		=>'db' ,
+					'status'	=>'001'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			return 	$rows  ;
+		}
 		
 		
 		public function getMenu()
 		{
-			$sql ="	SELECT am_id AS id ,am_parent_id AS parent_id, am_router AS router ,am_title AS title 
-					FROM admin_menu ORDER BY parent_id ASC , am_id ASC";
+			$sql ="	SELECT 
+						am_id AS id ,
+						am_parent_id AS parent_id, 
+						am_router AS router ,
+						am_title AS title ,
+						am_type AS type
+					FROM admin_menu 
+					WHERE am_type ='menu'
+					ORDER BY parent_id ASC , am_id ASC";
 			$query = $this->db->query($sql, $bind);
 			$rows = $query->result_array();
 			$error = $this->db->error();

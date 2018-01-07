@@ -14,6 +14,11 @@ class Admin extends CI_Controller {
 		}
     }
 	
+	public function renterTemplates()
+	{
+		$this->smarty->displayFrame('Admin/renterTemplates.tpl');
+	}
+	
 	public function index()
 	{
 		$this->smarty->displayFrame('Admin/frame.tpl');

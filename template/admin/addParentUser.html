@@ -1,4 +1,4 @@
-<div ng-init="init()">
+<div class="grid_3 grid_4" ng-init="init()">
 	<h3 id="forms-horizontal" ng-bind="data.action_title"></h3>
 	<p>
 	<form class="form-horizontal" method="POST">
@@ -23,7 +23,7 @@
 	  <div class="form-group">
 		<div class="col-sm-offset-2 col-sm-10">
 			<input  type="hidden" value='0'  name="superior" >
-			<button type="submit" ng-click="api(data.action_router);" class="btn btn-default">送出</button>
+			<button type="submit" ng-click="api('/addParentUser');" class="btn btn-default">送出</button>
 		</div>
 	  </div>
 	</form>

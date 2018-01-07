@@ -22,7 +22,7 @@
 		});
 	</script>
 </head>
-<body ng-controller="bodyCtrl">
+<body ng-controller="bodyCtrl" ng-init="init()">
 	<div id="wrapper">
 		<{*nav*}>
 		<{include file='Admin/nav.tpl'}>	
@@ -31,29 +31,26 @@
 			<div class="content-main">
 				<{*banner*}>
 				<div class="banner">
-					<h2 class="hide">
-						<a href="/#!/">Home</a>
-						<i  ng-show="data.nodes.router" class="fa fa-angle-right"></i>
-						<a style="color:#999" href="/#!/user{{data.nodes.router}}/{{data.selected}}/{{data.nodes.id}}" ng-show="data.nodes" ng-bind="data.nodes.title"></a>
-						<i  ng-show="data.action.title" class="fa fa-angle-right"></i>
-						<span  ng-show="data.action.title" ng-bind="data.action.title"></sapn>
+					<h2 >
+						<a  ng-click="navclick('','','');" href="/admin/renterTemplates#!/home/" target="iframe_a" >Home</a>
+						<i   ng-show="data.nodes.router" class="fa fa-angle-right"></i>
+						<a  style="color:#999" ng-click="navclick(data.nodes.title,data.root.router,data.nodes.router,data.nodes_id);"   target="iframe_a" href="/admin/renterTemplates#!{{data.root.router}}{{data.nodes.router}}" ng-show="data.nodes" ng-bind="data.nodes.title"></a>
 					</h2>
 					</h2>
 				</div>
 				<{*banner*}>
-				<!--grid-->
-				<div class="typo-grid">
-					<div class="typo-1">
-						<div class="grid_3 grid_4">
-							<div ng-view></div>
-						</div>
-					</div>
-				</div>
+				<iframe    allowtransparency="yes" frameborder="no" src=""  width="100%" height="800px" border="0" name="iframe_a"  ></iframe>
 			</div>
+			<input type="hidden" name="root_id" ng-model="data.root_id" value="{{data.root_id}}">
+			<input type="hidden" name="nodes_id" ng-model="data.nodes_id" value="{{data.nodes_id}}">
+			<input type="hidden" name="am_id" ng-model="data.am_id" value="{{data.am_id}}">
 			<{include file='Admin/foot.tpl'}>	
 		</div>
 		<!--scrolling js-->
 		<script src="/js/jquery.nicescroll.js"></script>
+		<script>
+		
+		</script>
 		<!--//scrolling js-->
 	</div>
 </body>

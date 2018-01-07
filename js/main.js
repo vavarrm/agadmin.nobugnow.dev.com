@@ -7,21 +7,39 @@ agApp.config(function($routeProvider){
 		templateUrl: templatePath+"index.html"+"?"+ Math.random(),
 		controller: "indexCtrl",
 		cache: false,
-    }).when("/user/list/:root_id/:nodes_id/",{
+    }).when("/home/",{
+		templateUrl: templatePath+"home.html"+"?"+ Math.random(),
+		controller: "indexCtrl",
+		cache: false,
+    }).when("/user/list/",{
 		templateUrl: templatePath+"user_list.html"+"?"+ Math.random(),
 		controller: "userCtrl",
 		cache: false,
-	}).when("/addChildUser/:root_id/:nodes_id/:am_id/:superior_id",{
+	}).when("/user/list/addChildUser/:superior_id",{
 		templateUrl: templatePath+"addChildUser.html"+"?"+ Math.random(),
 		controller: "userCtrl",
 		cache: false,
-	}).when("/addParentUser/:root_id/:nodes_id/:am_id/:superior_id",{
+	}).when("/user/list/addParentUser/",{
 		templateUrl: templatePath+"addParentUser.html"+"?"+ Math.random(),
 		controller: "userCtrl",
 		cache: false,
-	}).otherwise({
-        redirectTo: '/'
-    })
+	}).when("/user/list/setUserPasswd/:u_id",{
+		templateUrl: templatePath+"setUserPasswd.html"+"?"+ Math.random(),
+		controller: "userCtrl",
+		cache: false,
+	}).when("/user/list/setMoneyPasswd/:u_id",{
+		templateUrl: templatePath+"setMoneyPasswd.html"+"?"+ Math.random(),
+		controller: "userCtrl",
+		cache: false,
+	}).when("/user/list/setParent/:u_id",{
+		templateUrl: templatePath+"setParent.html"+"?"+ Math.random(),
+		controller: "userCtrl",
+		cache: false,
+	}).when("/user/list/recharge/:u_id",{
+		templateUrl: templatePath+"recharge.html"+"?"+ Math.random(),
+		controller: "userCtrl",
+		cache: false,
+	})
 });
 
 var indexCtrl = function($scope, $http, $rootScope){
@@ -49,25 +67,183 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 		action_title:'',
 		action_router:'',
 		superior_id:$routeParams.superior_id,
-		p:1
+		p:1,
+		user :{},
+		node :{},
+		menunode :{}
 	};
-	$scope.api = function(router)
+	$scope.setParentInit = function()
+	{
+		var obj ={
+			u_id :u_id
+		};
+		$scope.api('/getParentInfo',obj);
+	}
+	$scope.setUserPasswd = function()
+	{
+		var u_id = $routeParams.u_id;
+		if(
+			typeof u_id =="undefined" || 
+			typeof $scope.data.passwd =="undefined" || 
+			typeof $scope.data.passwd_confirm =="undefined" || 
+			$scope.data.passwd =="" ||
+			$scope.data.passwd_confirm =="" 
+		){
+
+			return false;
+		}
+		
+		if($scope.data.passwd !=$scope.data.passwd_confirm)
+		{
+			var obj ={
+				'message' :'两次输入密码不一致',
+			
+			};
+			dialog(obj);
+			return false;
+		}
+		
+		if($scope.data.passwd.length <8 || $scope.data.passwd.length >12)
+		{
+			var obj ={
+				'message' :'密码长度在8~12位',
+			
+			};
+			dialog(obj);
+			return false;
+		}
+		var obj ={
+			u_id :u_id
+		};
+		$scope.api('/setUserPasswd',obj);
+	}
+	
+	$scope.setMoneyPasswd = function()
+	{
+		var u_id = $routeParams.u_id;
+		if(
+			typeof u_id =="undefined" || 
+			typeof $scope.data.passwd =="undefined" || 
+			typeof $scope.data.passwd_confirm =="undefined" || 
+			$scope.data.passwd =="" ||
+			$scope.data.passwd_confirm =="" 
+		){
+
+			return false;
+		}
+		
+		if($scope.data.passwd !=$scope.data.passwd_confirm)
+		{
+			var obj ={
+				'message' :'两次输入密码不一致',
+			
+			};
+			dialog(obj);
+			return false;
+		}
+		
+		if($scope.data.passwd.length <8 || $scope.data.passwd.length >12)
+		{
+			var obj ={
+				'message' :'密码长度在8~12位',
+			
+			};
+			dialog(obj);
+			return false;
+		}
+		var obj ={
+			u_id :u_id
+		};
+		$scope.api('/setMoneyPasswd',obj);
+	}
+	
+	$scope.showChild = function(row, u_id)
+	{
+		var postdata={
+			superior_id : u_id
+		};
+		if(row.show == 'false')
+		{
+			row.show =true;
+		}else{
+			// row.show =false;
+			row.show ='false';
+		}
+       
+		var promise = apiService.adminApi('/childUserList',postdata);
+		promise.then
+			(
+				function(r) 
+				{
+					if(r.data.status =="100")
+					{
+						row.nodes = r.data.body.list;
+						// row.show =true;
+					}else{
+						var obj =
+						{
+							'message' :r.data.message,
+							buttons: 
+							[
+								{
+									text: "close",
+									click: function() 
+									{
+										$( this ).dialog( "close" );
+									}
+								}
+							]
+						};
+						dialog(obj);
+					}
+				},
+				function() {
+					var obj ={
+						'message' :'系統錯誤'
+					};
+					 dialog(obj);
+				}
+			)
+		
+	}
+	$scope.api = function(router, obj)
 	{
 		var error = false;
-		var postdata={};
+		var postdata={
+			am_id :$routeParams.am_id
+		};
+		if(typeof obj =="object")
+		{
+			$.extend( postdata, obj );
+		}
+		
 		$.each($('input[required=required]'), function(i, e){
 			if($(e).val() =="")
 			{
 				error = true;
 				return false;
 			}
-			postdata[$(e).attr('name')] = $(e).val();
+			if(typeof $(e).attr('name') !="undefined")
+			{
+				postdata[$(e).attr('name')] = $(e).val();
+			}
 		});
+		
+		$.each($('input[type=text]'), function(i, e){
+			if(typeof $(e).attr('name') !="undefined")
+			{
+				postdata[$(e).attr('name')] = $(e).val();
+			}
+		});
+		
 		if(!error)
 		{
 			
 			$.each($('input[type=hidden]'), function(i, e){
-				postdata[$(e).attr('name')] = $(e).val();
+				if(typeof $(e).attr('name') !="undefined")
+				{
+					postdata[$(e).attr('name')] = $(e).val();
+				}
 			})
 			
 			var promise = apiService.adminApi(router, postdata);
@@ -87,7 +263,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 									click: function() 
 									{
 										$( this ).dialog( "close" );
-										location.href="/#!/user/list/"+$routeParams.root_id+"/"+$routeParams.nodes_id;
+										location.href="/admin/renterTemplates#!/user/list/";
 									}
 								}
 							]
@@ -135,39 +311,107 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	$scope.init = function()
 	{
 		$scope.search();
-		var actions = findObjectByKey($scope.data.menulist, 'id', $routeParams.root_id);
-		actions = findObjectByKey(actions.nodes, 'id', $routeParams.nodes_id);	
-		var nodes_title = actions.title;
-		$scope.data.actions = actions.nodes;
-		var obj =
+		
+		if(typeof $routeParams.u_id !='undefined')
 		{
-			root_id:$routeParams.root_id,
-			nodes_id:$routeParams.nodes_id,
-			nodes_title:nodes_title ,
-			nodes_router:actions.router,
-			action_title:'' ,
-			am_id:'' ,
-			router:'' 
-		};
-		if(typeof $routeParams.am_id !="undefined")
-		{
-			var action = findObjectByKey($scope.data.actions, 'id', $routeParams.am_id);
-			obj.action_title = action.title;
-			obj.am_id = $routeParams.am_id;
-			obj.router = action.router;
-			$scope.data.action_title = action.title;
-			$scope.data.action_router =  action.router;
+			var obj ={
+				u_id : $routeParams.u_id
+			};
+			var promise = apiService.adminApi('/getUserByID',obj);
+			promise.then
+			(
+				function(r) 
+				{
+					if(r.data.status =="100")
+					{
+						$scope.data.user = r.data.body.user;
+					}else
+					{
+						var obj =
+						{
+							'message' :r.data.message,
+							buttons: 
+							[
+								{
+									text: "close",
+									click: function() 
+									{
+										$( this ).dialog( "close" );
+									}
+								}
+							]
+						};
+						dialog(obj);
+					}
+				},
+				function() {
+					var obj ={
+						'message' :'系統錯誤'
+					};
+					 dialog(obj);
+				}
+			)	
 		}
-		$rootScope.$broadcast('setMenuList', obj);
+		var nodes_id = $('input[type=hidden][name=nodes_id]', parent.document).val();
+		var obj ={
+			am_id :nodes_id,
+		};
+		var promise = apiService.adminApi('/getActionList',obj);
+		
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.actions = r.data.body.actionlist;
+				}else
+				{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)	
+	}
 	
+	$scope.reset= function()
+	{
+		$scope.data.u_account='';
+		$scope.data.p =1;
+		$scope.search();
+		
 	}
 	
 	$scope.search = function()
 	{
-		var obj = {
-			p :$scope.data.p
+		if(typeof $scope.data.u_account=="undefined")
+		{
+			$scope.data.u_account='';
 		}
-		var promise = apiService.userList(obj);
+		var obj = {
+			p :$scope.data.p,
+			u_account : $scope.data.u_account
+		}
+		var promise = apiService.adminApi('/userList', obj);
 		promise.then
 		(
 			function(r) 
@@ -211,16 +455,28 @@ var bodyCtrl = function($scope, apiService, $cookies, $rootScope, $routeParams){
 	{
 		selected 	:0,
 		nodes	:{},
-		action:{}
+		action:{},
+		root :{}
 	};
 	
-	$scope.navclick = function()
+	$scope.init = function()
 	{
-		location.href="/#!/";
+		
+	}
+	
+	$scope.navclick = function(title, root_router, nodes_router ,nodes_id)
+	{
+		// console.log(nodes_id);
+		$scope.data.root.router = root_router;
+		$scope.data.nodes.router = nodes_router;
+		$scope.data.nodes.title = title;
+		$scope.data.nodes_id = nodes_id;
+		// $scope.data.nodes.router='s';
 	}
 	
 	$rootScope.$on('setMenuList', function(event, data){	
 		$scope.data.selected = data.root_id;
+		$scope.data.root_id = data.root_id;
 		$scope.data.nodes.title = data.nodes_title;
 		$scope.data.nodes.id = data.nodes_id;
 		$scope.data.nodes.router = data.nodes_router;
@@ -241,7 +497,7 @@ var bodyCtrl = function($scope, apiService, $cookies, $rootScope, $routeParams){
 	
 	$scope.getMenu = function()
 	{
-		var promise = apiService.getMenu();
+		var promise = apiService.adminApi('/getMenu');
 		promise.then
 		(
 			function(r) 
@@ -250,10 +506,7 @@ var bodyCtrl = function($scope, apiService, $cookies, $rootScope, $routeParams){
 				{
 					$scope.menuList =r.data.body.menulist;
 					var menulist = $cookies.getObject('menulist');
-					if(typeof menulist =="undefined")
-					{
-						$cookies.putObject('menulist', r.data.body.menulist, { path: '/'});
-					}	
+					$cookies.putObject('menulist', r.data.body.menulist, { path: '/'});
 				}else
 				{
 					var obj =
@@ -287,15 +540,10 @@ agApp.controller('bodyCtrl',  ['$scope','apiService' , '$cookies', '$rootScope' 
 
 var apiService = function($http, $cookies)
 {
+
 	var sess = $cookies.get('sess');
 	return {
-		getMenu: function(){
-			return $http.get('/Api/getMenu?sess='+sess);
-		},
-		userList :function(postdata){
-			return $http.post('/Api/userList?sess='+sess, postdata,  {headers: {'Content-Type': 'application/json'}});
-		},
-		adminApi :function($router, postdata){
+		adminApi :function($router, postdata, root_id, nodes_id){
 			
 			return $http.post('/Api'+$router+'?sess='+sess, postdata,  {headers: {'Content-Type': 'application/json'} });
 		}
@@ -349,6 +597,8 @@ function dialog(object2)
 	$( "#dialog" ).dialog(object1);
 }
 
-
+function resizeIframe(obj) {
+	obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+}
 
 
