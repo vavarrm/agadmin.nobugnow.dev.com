@@ -47,6 +47,43 @@
 		}
 		
 		
+		public function getUserAccountInfo($uid)
+		{
+			$sql ="	SELECT 
+						u_account ,
+						(
+							SELECT IFNULL(SUM(ua_value),0) as u_balance
+							FROM user_account 
+							WHERE 
+								ua_to = u.u_id
+								AND ua_status ='allowed'
+						)  AS u_balance
+					FROM user  AS u
+					WHERE u_id =?
+	
+					";
+			$bind = array(
+				$uid
+			);
+			$query = $this->db->query($sql, $bind);
+			$row =  $query->row_array();
+			$query->free_result();
+			$error = $this->db->error();
+			if($error['message'] !="")
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>$error['message'] ,
+					'type' 		=>'db' ,
+					'status'	=>'001'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			return $row;
+		}
+		
 		public function setUserPasswd($ary= array())
 		{
 			$sql ="UPDATE user SET u_passwd =md5(?) WHERE u_id =?";

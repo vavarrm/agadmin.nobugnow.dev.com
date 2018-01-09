@@ -1,0 +1,53 @@
+<div  ng-init="adminListInit()">
+	<div class="grid_3 grid_4">
+		<div class="grid-form1">
+			<form class="form-inline">
+			  <div class="form-group">
+				帐号：<input type="text" ng-model="data.s_account" class="form-control datepicker" placeholder="帐号">
+			  </div>
+			  <button type="submit" class="btn btn-default" ng-click="searchClick()">搜寻</button>
+			  <button  class="btn btn-default" ng-click="reset()">清除搜寻条件</button>
+			</form>
+		</div>
+	</div>
+	<div class="grid_3 grid_4">
+		<div class="col-md-12 page_1">
+			<a  ng-repeat="action in  data.actions" ng-click="heard_btn(action.id)" ng-if="action.type=='head_button'" href="/admin/renterTemplates#!/system{{action.router}}"  type="button" class="btn btn-lg btn-default" >新增帐号</a>
+		</div>
+		<div class="clearfix"> </div>
+		<div class="but_list">
+			<div class="col-md-12 page_1">
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<th width="40%" style="text-align:center">帐号</th>
+							<th width="40%" style="text-align:center">角色</th>
+							<th width="20%" style="text-align:center"></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="row in data.list">
+							<td valign="middle" ng-bind="row.ad_account"></td>
+							<td valign="middle" ng-bind="row.ar_name"></td>
+							<td valign="middle" ></td>
+						</tr>
+					</tbody>
+				</table>  
+				<div>
+					<ul class="pagination pagination-sm">
+						<li  ng-class="data.p=='1'?'disabled':''">
+							<a ng-click="clickpage(data.p -1);$event.preventDefault();" href="#"><i class="fa fa-angle-left"></i></a>
+						</li>
+						<li  ng-class="($index +1)==data.p?'active':''" ng-repeat="n in [] | range:data.pages">
+							<a ng-click="clickpage($index +1);$event.preventDefault();" href="#" ng-bind="$index +1"></a>
+						</li>
+						<li ng-class="data.p==pageinfo.pages?'disabled':''">
+							<a ng-click="clickpage(data.p +1);$event.preventDefault();" href="#"><i class="fa fa-angle-right"></i></a>
+						</li>
+					</ul>	
+				</div>
+			</div>
+			<div class="clearfix"> </div>
+		</div>
+	</div>
+</div>
