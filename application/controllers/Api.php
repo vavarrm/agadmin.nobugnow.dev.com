@@ -99,6 +99,9 @@ class Api extends CI_Controller {
 		try 
 		{
 			$ary['ad.ad_account'] =  array('value' =>$ad_account , 'operator' =>'=');
+			$ary['order'] = array(
+				'ad.ad_id'=>'DESC'
+			);
 			// var_dump($ary);
 			$output['body'] = $this->admin->adminList($ary);
 		}catch(MyException $e)

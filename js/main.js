@@ -890,7 +890,23 @@ var adminCtrl = function($scope, $http, apiService, $cookies, $routeParams, $roo
 			{
 				if(r.data.status =="100")
 				{
-					$scope.data.options = r.data.body.list;
+					var obj =
+					{
+						'message' :'新增成功',
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+									location.href='/admin/renterTemplates#!/system/adminList/';
+								}
+							}
+						]
+					};
+					dialog(obj);
+		
 				}else
 				{
 					var obj =

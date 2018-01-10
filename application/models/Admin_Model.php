@@ -13,7 +13,8 @@
 			$where .=" WHERE 1 = 1";
 			$gitignore = array(
 				'limit',
-				'p'
+				'p',
+				'order'
 			);
 			$limit = sprintf(" LIMIT %d, %d",abs($ary['p']-1)*$ary['limit'],$ary['limit']);
 
@@ -29,12 +30,22 @@
 					$bind[] = $value['value'];
 				}
 			}
+			
+			if(is_array($ary['order']))
+			{
+				$order =" ORDER BY ";
+				foreach($ary['order'] AS $key =>$value)
+				{
+					$order.=sprintf( '%s %s', $key, $value);
+				}
+			}
+			
 			$sql =" SELECT 
 						ad.*,
 						ar.*
 					FROM 
 						admin AS ad LEFT JOIN  admin_role AS ar ON ad.ad_role = ar.ar_id";
-			$search_sql = $sql.$where.$limit ;
+			$search_sql = $sql.$where.$order.$limit ;
 			$query = $this->db->query($search_sql, $bind);
 			$rows = $query->result_array();
 			
