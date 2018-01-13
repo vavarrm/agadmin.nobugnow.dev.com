@@ -1,10 +1,11 @@
-<div  ng-init="init()">
+<input type="hidden"  ng-model="data.router" ng-init="data.router ='/userList'">
+<div  ng-init="init()" >
 	<div class="grid_3 grid_4">
 		<div class="grid-form1">
 			<form class="form-inline">
 			  <div class="form-group">
 				<label class="sr-only" for="exampleInputPassword3">使用者帳號</label>
-				<input type="text" ng-model="data.u_account" name="s_u_account" class="form-control" placeholder="使用者帳號">
+				<input type="text" ng-model="data.search.u_account"  class="form-control" placeholder="使用者帳號">
 			  </div>
 			  <button type="submit" class="btn btn-default" ng-click="search()">搜寻</button>
 			  <button  class="btn btn-default" ng-click="reset()">清除搜寻条件</button>
@@ -27,7 +28,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat-start="row in list">
+						<tr ng-repeat-start="row in data.list">
 							<td valign="middle">
 								<i  ng-click="showChild(row,row.u_id)" ng-show ="row.u_superior_id =='0'>0" class="fa fa-minu" ng-class="row.u_have_child =='0'?'fa-minus':row.show=='false'?'fa-arrow-circle-down':'fa-arrow-circle-up'" aria-hidden="true"></i>
 								{{row.u_account}}

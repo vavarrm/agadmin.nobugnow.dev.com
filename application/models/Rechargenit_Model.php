@@ -85,7 +85,7 @@
 						ua.*
 					FROM 
 						user_account AS ua 
-							INNER JOIN user AS u  ON ua.ua_to = u.u_id
+							INNER JOIN user AS u  ON ua.ua_u_id = u.u_id
 							INNER JOIN admin AS ad  ON ua.ua_from = ad.ad_id
 					";
 			$search_sql = $sql.$where.$order.$limit ;
@@ -122,7 +122,7 @@
 		{
 			$this->db->trans_start();
 			$sql = "INSERT INTO user_account 
-					(ua_value,	ua_type, ua_add_datetime, ua_from, ua_to, ua_remarks)
+					(ua_value,	ua_type, ua_add_datetime, ua_from, ua_u_id, ua_remarks)
 					VALUES(?,?,NOW(),?,?,?)";
 			$bind= array(
 				$ary['ua_balance'],

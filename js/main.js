@@ -52,6 +52,16 @@ agApp.config(function($routeProvider){
 		controller: "adminCtrl",
 		cache: false,
 	})
+	.when("/user/announcemetList/",{
+		templateUrl: templatePath+"announcemetList.html"+"?"+ Math.random(),
+		controller: "userCtrl",
+		cache: false,
+	})
+	.when("/user/announcemetList/add/",{
+		templateUrl: templatePath+"announcemetAddForm.html"+"?"+ Math.random(),
+		controller: "userCtrl",
+		cache: false,
+	})
 });
 
 var indexCtrl = function($scope, $http, $rootScope){
@@ -86,8 +96,122 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 		options :{},
 		u_id:'',
 		balance :0,
-		remarks :''
+		remarks :'',
+		router:''
 	};
+	
+	$scope.addAnnouncemetClick = function(router)
+	{
+		if(typeof $scope.data.title =="undefined")
+		{
+			return false;
+		}
+		
+		if(typeof $scope.data.content =="undefined")
+		{
+			return false;
+		}
+		
+		var obj ={
+			title : $scope.data.title,
+			content :$scope.data.content
+		}
+		var promise = apiService.adminApi(router, obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					var obj =
+					{
+						'message' :'新增成功',
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+									location.href="/admin/renterTemplates#!/user/announcemetList/";
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}else{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.announcemetSearch = function()
+	{
+		var obj = {};
+		var promise = apiService.adminApi('/getAnnouncemetList', obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.list = r.data.body.list;
+					$scope.data.actions = r.data.body.actions;
+					$scope.pageinfo =r.data.body.pageinfo; 
+				}else{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.announcemetListinit = function()
+	{
+		$scope.search();
+		$( ".datepicker" ).datepicker({ dateFormat:'yy-mm-dd' });
+	}
+	
 	$scope.addBalance = function()
 	{
 		
@@ -415,7 +539,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 		}
 	}
 	
-	$scope.clickpage = function(p)
+	$scope.clickpage = function(p, fun)
 	{
 		if(p>$scope.pageinfo.pages || p<1)
 		{
@@ -427,6 +551,10 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	
 	$scope.init = function()
 	{
+		if(typeof $scope.data.u_account=="undefined")
+		{
+			$scope.data.u_account='';
+		}
 		$scope.search();
 		
 		if(typeof $routeParams.u_id !='undefined')
@@ -468,51 +596,17 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 					 dialog(obj);
 				}
 			)	
-		}
-		var nodes_id = $('input[type=hidden][name=nodes_id]', parent.document).val();
-		var obj ={
-			am_id :nodes_id,
-		};
-		var promise = apiService.adminApi('/getActionList',obj);
-		
-		promise.then
-		(
-			function(r) 
-			{
-				if(r.data.status =="100")
-				{
-					$scope.data.actions = r.data.body.actionlist;
-				}else
-				{
-					var obj =
-					{
-						'message' :r.data.message,
-						buttons: 
-						[
-							{
-								text: "close",
-								click: function() 
-								{
-									$( this ).dialog( "close" );
-								}
-							}
-						]
-					};
-					dialog(obj);
-				}
-			},
-			function() {
-				var obj ={
-					'message' :'系統錯誤'
-				};
-				 dialog(obj);
-			}
-		)	
+		}	
 	}
 	
 	$scope.reset= function()
 	{
-		$scope.data.u_account='';
+		if(typeof $scope.data.search !="undefined")
+		{
+			$.each($scope.data.search,function(i,e){
+				$scope.data.search[i] = '';
+			})
+		}
 		$scope.data.p =1;
 		$scope.search();
 		
@@ -520,23 +614,44 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	
 	$scope.search = function()
 	{
-		if(typeof $scope.data.u_account=="undefined")
-		{
-			$scope.data.u_account='';
-		}
 		var obj = {
 			p :$scope.data.p,
-			u_account : $scope.data.u_account
 		}
-		var promise = apiService.adminApi('/userList', obj);
+		if(typeof $scope.data.search !="undefined")
+		{
+			$.each($scope.data.search,function(i,e){
+				obj[i] = e;
+			})
+		}
+		if(typeof $scope.data.search !="undefined" && typeof $scope.data.search.start_time !="undefined" && typeof $scope.data.search.end_time !="undefined")
+		{
+			var obj =
+			{
+				'message' :'起始时间要小于结束时间',
+				buttons: 
+				[
+					{
+						text: "close",
+						click: function() 
+						{
+							$( this ).dialog( "close" );
+						}
+					}
+				]
+			};
+			dialog(obj);
+			return false;
+		}
+		var promise = apiService.adminApi($scope.data.router, obj);
 		promise.then
 		(
 			function(r) 
 			{
 				if(r.data.status =="100")
 				{
-					$scope.list = r.data.body.list;
+					$scope.data.list = r.data.body.list;
 					$scope.pageinfo = r.data.body.pageinfo;
+					$scope.data.actions = r.data.body.actions;
 				}else
 				{
 					var obj =

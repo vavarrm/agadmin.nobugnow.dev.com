@@ -16,6 +16,7 @@ class Api extends CI_Controller {
 		$this->load->model('Admin_Model', 'admin');
 		$this->load->model('User_Model', 'user');
 		$this->load->model('Rechargenit_Model', 'rechargenit');
+		$this->load->model('Announcemet_Model', 'announcemet');
 
 		$output['status'] = 100;
 		$output['body'] =array();
@@ -86,6 +87,75 @@ class Api extends CI_Controller {
 			exit;
 		}
     }
+	
+	
+	public function addAnnouncemet()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='新增公告';
+		$output['message'] = '成功新增';
+		try 
+		{
+			if(
+				$this->request['title'] =="" ||
+				$this->request['content'] =="" 
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$ary  =array(
+				'an_title'=>$this->request['title'] ,
+				'an_content'=>$this->request['content']
+			);
+			$this->announcemet->add($ary);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function getAnnouncemetList()
+	{
+		
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得公告列表';
+		$output['message'] = '成功取得';
+		$ary['limit'] = (isset($this->request['limit']))?$this->request['limit']:5;
+		$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
+		try 
+		{
+			$ary['order'] = array(
+				'an_datetime' =>	'DESC'
+			);
+			$output['body'] = $this->announcemet->getList($ary);
+			$output['body']['actions'] = $this->admin->getActionlist($this->request['am_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
 	
 	public function adminList()
 	{
@@ -783,6 +853,7 @@ class Api extends CI_Controller {
 		try 
 		{
 			$output['body'] = $this->user->getList($ary);
+			$output['body']['actions'] = $this->admin->getActionlist($this->request['am_id']);
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();

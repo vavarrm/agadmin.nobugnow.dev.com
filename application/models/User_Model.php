@@ -55,7 +55,7 @@
 							SELECT IFNULL(SUM(ua_value),0) as u_balance
 							FROM user_account 
 							WHERE 
-								ua_to = u.u_id
+								ua_u_id = u.u_id
 								AND ua_status ='allowed'
 						)  AS u_balance
 					FROM user  AS u
