@@ -61,6 +61,10 @@ agApp.config(function($routeProvider){
 		templateUrl: templatePath+"announcemetAddForm.html"+"?"+ Math.random(),
 		controller: "userCtrl",
 		cache: false,
+	}).when("/user/announcemetList/edit/:an_id",{
+		templateUrl: templatePath+"announcemeEditForm.html"+"?"+ Math.random(),
+		controller: "userCtrl",
+		cache: false,
 	})
 });
 
@@ -99,6 +103,219 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 		remarks :'',
 		router:''
 	};
+	
+	$scope.editAnnouncemetClick = function(router)
+	{
+		var obj ={
+			an_id :	$routeParams.an_id,
+			an_title :	$scope.data.row.title,
+			an_content :	$scope.data.row.content
+			
+		};
+		var promise = apiService.adminApi(router, obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					var obj =
+					{
+						'message' :'更新成功',
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+									location.href="/admin/renterTemplates#!/user/announcemetList/";
+								}
+							}
+						]
+					};
+										dialog(obj);
+				}else{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.announcemeEditFormInit = function()
+	{
+		$scope.data.an_id = $routeParams.an_id;
+		var obj ={
+			an_id :	$scope.data.an_id
+		};
+		var promise = apiService.adminApi('/getAnnouncemet', obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.row = r.data.body.row;
+				}else{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.deleteAnnouncemet = function()
+	{
+		if($('.checkbox:checked').length =='0')
+		{
+			var obj =
+				{
+					'message' :'请选则要删除项',
+					buttons: 
+					[
+						{
+							text: "close",
+							click: function() 
+							{
+								$( this ).dialog( "close" );
+							}
+						}
+					]
+				};
+			dialog(obj);
+			return false;
+		}
+		
+			var obj =
+			{
+				'message' :'确认删除',
+				buttons: 
+				[
+					{
+						text: "是",
+						click: function() 
+						{
+							$( this ).dialog( "close" );
+							var an_id = new Array();
+							$.each($('.checkbox:checked'), function(i, e){
+								an_id.push($(e).val())
+							})
+							var obj={
+								an_id :an_id
+							}
+							var promise = apiService.adminApi('/delAnnouncemet', obj);
+							promise.then
+							(
+								function(r) 
+								{
+									if(r.data.status =="100")
+									{
+										var obj =
+										{
+											'message' :'刪除成功',
+											buttons: 
+											[
+												{
+													text: "close",
+													click: function() 
+													{
+														$( this ).dialog( "close" );
+														$scope.search();
+													}
+												}
+											]
+										};
+										dialog(obj);
+									}else{
+										var obj =
+										{
+											'message' :r.data.message,
+											buttons: 
+											[
+												{
+													text: "close",
+													click: function() 
+													{
+														$( this ).dialog( "close" );
+													}
+												}
+											]
+										};
+										dialog(obj);
+									}
+								},
+								function() {
+									var obj ={
+										'message' :'系統錯誤'
+									};
+									 dialog(obj);
+								}
+							)
+						}
+					},
+					{
+						text: "否",
+						click: function() 
+						{
+							$( this ).dialog( "close" );
+						}
+					}
+				]
+			};
+			dialog(obj);
+	}
+	
+	$scope.actionClick = function($event,func)
+	{
+		if( func !=null)
+		{
+			$event.preventDefault();
+			if(typeof $scope[func] =='function')
+			{
+				$scope[func]();
+			}
+		}
+		
+	}
 	
 	$scope.addAnnouncemetClick = function(router)
 	{
@@ -625,22 +842,25 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 		}
 		if(typeof $scope.data.search !="undefined" && typeof $scope.data.search.start_time !="undefined" && typeof $scope.data.search.end_time !="undefined")
 		{
-			var obj =
+			if($scope.data.search.start_time > $scope.data.search.end_time )
 			{
-				'message' :'起始时间要小于结束时间',
-				buttons: 
-				[
-					{
-						text: "close",
-						click: function() 
+				var obj =
+				{
+					'message' :'起始时间要小于结束时间',
+					buttons: 
+					[
 						{
-							$( this ).dialog( "close" );
+							text: "close",
+							click: function() 
+							{
+								$( this ).dialog( "close" );
+							}
 						}
-					}
-				]
-			};
-			dialog(obj);
-			return false;
+					]
+				};
+				dialog(obj);
+				return false;
+			}
 		}
 		var promise = apiService.adminApi($scope.data.router, obj);
 		promise.then

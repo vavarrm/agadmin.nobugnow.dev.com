@@ -211,7 +211,8 @@
 						am_type AS type,
 						am_title AS title,
 						am_router AS router,
-						am_id AS id
+						am_id AS id,
+						am_func AS func
 					FROM admin_menu WHERE am_parent_id =?";
 					
 			$bind = array(

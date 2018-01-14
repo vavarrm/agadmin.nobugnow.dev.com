@@ -89,6 +89,112 @@ class Api extends CI_Controller {
     }
 	
 	
+	public function editAnnouncemet()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='更新公告';
+		$output['message'] = '更新成功';
+		try 
+		{
+			if(
+				$this->request['an_id'] =="" ||
+				$this->request['an_title'] =="" ||
+				$this->request['an_content'] =="" 
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$output['body']['affected_rows'] = $this->announcemet->update($this->request);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function getAnnouncemet()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得公告';
+		$output['message'] = '取得成功';
+		try 
+		{
+			if(
+				$this->request['an_id'] =="" 
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$output['body']['row'] = $this->announcemet->getRow($this->request['an_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function delAnnouncemet()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='刪除公告';
+		$output['message'] = '刪除成功';
+		try 
+		{
+			if(
+				$this->request['an_id'] =="" ||
+				!is_array($this->request['an_id']) ||
+				count($this->request['an_id']) == 0
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$this->announcemet->del($this->request['an_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
 	public function addAnnouncemet()
 	{
 		$output['status'] = 100;
@@ -137,8 +243,12 @@ class Api extends CI_Controller {
 		$output['message'] = '成功取得';
 		$ary['limit'] = (isset($this->request['limit']))?$this->request['limit']:5;
 		$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
+		$start_time = (isset($this->request['start_time']))?$this->request['start_time']:'';
+		$end_time = (isset($this->request['end_time']))?$this->request['end_time']:'';
 		try 
 		{
+			$ary['start_time'] =  array('operator' => '>=' , 'value'=>$start_time); 
+			$ary['end_time'] =  array('operator' => '<=' , 'value'=>$end_time); 
 			$ary['order'] = array(
 				'an_datetime' =>	'DESC'
 			);

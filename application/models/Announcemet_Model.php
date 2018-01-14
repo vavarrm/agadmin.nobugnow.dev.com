@@ -8,6 +8,125 @@
 			$this->load->database();
 		}
 		
+		
+		public function update($ary = array())
+		{	
+			$sql ="	UPDATE  announcemet 	
+					SET an_title = ? , an_content=? , 	an_update_datetime = NOW()  
+					WHERE an_id =?";
+			$bind = array(
+				$ary['an_title'],
+				$ary['an_content'],
+				$ary['an_id']
+			);
+			$query = $this->db->query($sql, $bind);
+			
+			$error = $this->db->error();
+			if($error['message'] !="")
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>$error['message'] ,
+					'type' 		=>'db' ,
+					'status'	=>'001'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			$affected_rows = $this->db->affected_rows();
+			if($affected_rows ==0)
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>'无资料更新' ,
+					'type' 		=>'db' ,
+					'status'	=>'999'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			return 	$affected_rows ;
+		}
+		
+		public function getRow($an_id)
+		{
+			$sql ="	SELECT 
+					an_content AS  content,
+					an_title AS  title
+					FROM announcemet WHERE an_id =?";
+			$bind = array($an_id);
+			$query = $this->db->query($sql, $bind);
+			$row = $query->row_array();
+			$query->free_result();
+			
+			$error = $this->db->error();
+			if($error['message'] !="")
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>$error['message'] ,
+					'type' 		=>'db' ,
+					'status'	=>'001'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			
+		}
+		
+		
+		public function del($an_id = array())
+		{
+			if(count($an_id) == 0)
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>'无傳入參數' ,
+					'type' 		=>'db' ,
+					'status'	=>'999'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$an_id_str = join("','", $an_id);
+			$sql="DELETE FROM announcemet WHERE an_id IN('".$an_id_str."')";
+			$query = $this->db->query($sql);
+			$error = $this->db->error();
+			if($error['message'] !="")
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>$error['message'] ,
+					'type' 		=>'db' ,
+					'status'	=>'001'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			if($this->db->affected_rows()   == 0)
+			{
+				$MyException = new MyException();
+				$array = array(
+					'message' 	=>'无资料更新' ,
+					'type' 		=>'db' ,
+					'status'	=>'999'
+				);
+				
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			return true;
+		}
+		
 		public function add($ary = array())
 		{
 			$sql="INSERT INTO announcemet (an_title, an_content, an_datetime)
@@ -65,8 +184,18 @@
 					{
 						continue;
 					}
-					$where.=sprintf( " AND %s%s?", $key,  $value['operator']);
-					$bind[] = $value['value'];
+					if($key =="start_time" || $key=="end_time"  )
+					{
+						if($value['value']!='')
+						{
+							$where .=sprintf(" AND DATE_FORMAT(`an_datetime`, '%s') %s ?", '%Y-%m-%d', $value['operator']);					
+							$bind[] = $value['value'];
+						}
+					}else
+					{
+						$where .=sprintf(" AND %s %s ?", $key, $row['operator']);					
+						$bind[] = $row['value'];
+					}
 				}
 			}
 			
@@ -85,6 +214,7 @@
 					FROM 
 						announcemet";
 			$search_sql = $sql.$where.$order.$limit ;
+			// echo $search_sql;
 			$query = $this->db->query($search_sql, $bind);
 			$rows = $query->result_array();
 			
