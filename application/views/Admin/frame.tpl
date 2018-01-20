@@ -9,6 +9,7 @@
 	<!-- Custom Theme files -->
 	<{include file='Admin/js.tpl'}>
 	<script>
+		var FRONT_URL ="<{$FRONT_URL}>"; 
 		$(function () {
 			$('#supported').text('Supported/allowed: ' + !!screenfull.enabled);
 

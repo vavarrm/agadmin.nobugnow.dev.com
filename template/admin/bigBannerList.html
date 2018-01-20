@@ -1,5 +1,5 @@
 <input type="hidden"  ng-model="data.router" ng-init="data.router ='/getAnnouncemetList'">
-<div  ng-init="announcemetListinit()">
+<div  ng-init="bigBannerListInit()">
 	<div class="grid_3 grid_4">
 		<div class="grid-form1">
 			<form class="form-inline">
@@ -20,7 +20,7 @@
 	</div>
 	<div class="grid_3 grid_4">
 		<div class="col-md-12 page_1">
-			<a href="/admin/renterTemplates#!/user/announcemetList{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
+			<a href="/admin/renterTemplates#!/website{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
 			<span ng-repeat-end></span>
 		</div>
 		<div class="clearfix"> </div>

@@ -6,17 +6,164 @@
 			
 			parent::__construct();
 			$this->load->database();
+			
 		}
 		
-		public function changeStatus($ary = array(), $status)
+		
+
+		public function changeStatus($ary = array(), $status, $admin)
 		{
+			try {
+				$this->db->trans_start();
+				if(is_array($ary))
+				{
+					$str = join("','", $ary);
+				}
+				$sql = sprintf("UPDATE user_account SET ua_status = ?  WHERE ua_id IN('%s')", $str);
+				$bind =  array(
+					$status
+				);
+				$query = $this->db->query($sql, $bind);
+				$error = $this->db->error();
+				if($error['message'] !="")
+				{
+					$MyException = new MyException();
+					$array = array(
+						'message' 	=>$error['message'] ,
+						'type' 		=>'db' ,
+						'status'	=>'001'
+					);
+					
+					$MyException->setParams($array);
+				}
+				$affected_rows =  $this->db->affected_rows();
+				
+				if(is_array($ary) && count($ary)>0  && $affected_rows >0)
+				{
+					foreach($ary as $value)
+					{
+						$sql="INSERT INTO user_account_record(uar_am_id, uar_ua_id, uar_action, uar_add_datetime, uar_change_status)
+								VALUES(?, ?,'change_status',NOW(),?)";
+						$bind=array(
+							$admin['ad_id'],
+							$value,
+							$status,
+						);
+						$query = $this->db->query($sql, $bind);
+						$error = $this->db->error();
+						if($error['message'] !="")
+						{
+							$MyException = new MyException();
+							$array = array(
+								'message' 	=>$error['message'] ,
+								'type' 		=>'db' ,
+								'status'	=>'001'
+							);
+							
+							$MyException->setParams($array);
+						}
+					}
+				}
+				
+				$this->db->trans_commit();
+				return $affected_rows;
+			}
+			catch (Exception $e) {
+				$this->db->trans_rollback();
+				throw $e;
+			}
+		}
+		
+		public function getList($ary=array())
+		{
+			$where =" WHERE 1=1 ";
+			$order="";
+			$gitignore = array(
+				'limit',
+				'p',
+				'order'
+			);
+			$limit = sprintf(" LIMIT %d, %d",abs($ary['p']-1)*$ary['limit'],$ary['limit']);
 			if(is_array($ary))
 			{
-				$str = join("','", $ary);
+				foreach($ary as $key =>$row)
+				{
+				
+					if(in_array($key, $gitignore) || $row['value']==='' )	
+					{
+						continue;
+					}
+
+					
+					if($key =="start_time" || $key=="end_time"  )
+					{
+						// echo $key;
+						if($row['value']!='')
+						{
+							if($row['logic'] =="")
+							{
+								$logic =" AND "; 
+							}else{
+								$logic = $row['logic'];
+							}
+							$where .=sprintf(" %s DATE_FORMAT(`ua_add_datetime`, '%s') %s ?",$logic  ,'%Y-%m-%d', $row['operator']);					
+							$bind[] = $row['value'];
+						}
+					}else
+					{
+						$where .=sprintf(" AND %s %s ?", $key, $row['operator']);					
+						$bind[] = $row['value'];
+					}
+				}
 			}
-			$sql = sprintf("UPDATE user_account SET ua_status = ? WHERE ua_id IN('%s')", $str);
-			$bind[] = $status;
-			$query = $this->db->query($sql, $bind);
+			
+			if(is_array($ary['order']) && !empty($ary['order']))
+			{
+				$order =" ORDER BY ";
+				foreach($ary['order'] AS $key =>$value)
+				{
+					$order_ary[]=sprintf( '%s %s ', $key, $value);
+				}
+				$order.=join(',',$order_ary);
+			}
+			
+			$sql = "SELECT
+						u.u_account,
+						CASE
+							WHEN ua.ua_type = '3' THEN ua.ua_value*-1
+							ELSE ua.ua_value
+						END AS ua_value_show,
+							CASE
+							WHEN  ua_status = 'noAllowed' THEN '拒绝'
+							WHEN  ua_status = 'audit' THEN '审核中'
+							WHEN  ua_status = 'payment' THEN '已出款'
+							WHEN  ua_status = 'recorded' THEN '已入帐'
+						END AS 	ua_status_show,
+						ua.*,
+						ad.*,
+						ub.*,
+						bi.*
+					FROM 
+						user_account AS ua 
+							INNER JOIN user AS u  ON ua.ua_u_id = u.u_id
+							LEFT JOIN admin AS ad  ON ua.ua_from = ad.ad_id
+							LEFT JOIN user_bank_info AS ub ON ub.ub_id = ua_ub_id
+							LEFT JOIN bank_info AS bI ON ub.ub_bank_id = bi_id
+					";
+			$search_sql = $sql.$where.$order.$limit ;
+			$query = $this->db->query($search_sql, $bind);
+			$rows = $query->result_array();
+			
+			$total_sql = sprintf("SELECT COUNT(*) AS total FROM(%s) AS t",$sql.$where) ;
+			$query = $this->db->query($total_sql, $bind);
+			$row = $query->row_array();
+			
+			$query->free_result();
+			$output['list'] = $rows;
+			$output['pageinfo']  = array(
+				'total'	=>$row['total'],
+				'pages'	=>ceil($row['total']/$ary['limit'])
+			);
 			$error = $this->db->error();
 			if($error['message'] !="")
 			{
@@ -29,8 +176,7 @@
 				
 				$MyException->setParams($array);
 			}
-			$affected_rows =  $this->db->affected_rows();
-			return $affected_rows;
+			return $output;
 		}
 		
 		public function getAccountAuditList($ary=array())

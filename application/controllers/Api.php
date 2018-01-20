@@ -12,11 +12,13 @@ class Api extends CI_Controller {
 		parent::__construct();	
 		
 		$get = $this->input->get();
+		$post = $this->input->post();
 		$this->request = json_decode(trim(file_get_contents('php://input'), 'r'), true);
 		$this->load->model('Admin_Model', 'admin');
 		$this->load->model('User_Model', 'user');
 		$this->load->model('Rechargenit_Model', 'rechargenit');
 		$this->load->model('Announcemet_Model', 'announcemet');
+		$this->load->model('Banner_Model', 'banner');
 
 		$output['status'] = 100;
 		$output['body'] =array();
@@ -88,22 +90,22 @@ class Api extends CI_Controller {
 		}
     }
 	
+
 	
-	public function editAnnouncemet()
+	public function addBigBalance()
 	{
 		$output['status'] = 100;
 		$output['body'] =array();
-		$output['title'] ='更新公告';
-		$output['message'] = '更新成功';
-		try 
+		$output['title'] ='新增大轮播图';
+		$output['message'] = '新增成功';
+		$post = $this->input->post();
+		try
 		{
 			if(
-				$this->request['an_id'] =="" ||
-				$this->request['an_title'] =="" ||
-				$this->request['an_content'] =="" 
+				$post['order'] ==="" 
 			){
 				$array = array(
-					'message' 	=>'reponse 必傳參數為空' ,
+					'message' 	=>'必傳參數為空' ,
 					'type' 		=>'api' ,
 					'status'	=>'002'
 				);
@@ -111,7 +113,47 @@ class Api extends CI_Controller {
 				$MyException->setParams($array);
 				throw $MyException;
 			}
-			$output['body']['affected_rows'] = $this->announcemet->update($this->request);
+			// $ary  =array(
+				// 'an_title'=>$post['title'] ,
+				// 'an_content'=>$post['content'],
+				// 'an_type'=>$post['type'],
+				// 'an_id' =>$post['an_id']
+			// );
+			$affected_rows  = $this->banner->addBig($ary);
+			
+			if($affected_rows == 0)
+			{
+				$array = array(
+					'message' 	=>'新增失败' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		$this->myfunc->gotoUrl('/admin/renterTemplates#!/website/bigBannerList',$output['message'] );
+	}
+	
+	public function bigBannerList()
+	{
+		$output['status'] = 100;
+		$output['body'] =array(
+		);
+		$output['title'] ='大圖輪播列表';
+		$output['message'] = '执行成功';
+		try 
+		{
+
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();
@@ -123,6 +165,156 @@ class Api extends CI_Controller {
 		}
 		
 		$this->response($output);
+	}
+	
+	public function doWithdrawalAudit()
+	{
+		$output['status'] = 100;
+		$output['body'] =array(
+			'affected_rows'	=>0
+		);
+		$output['title'] ='修改提款状态';
+		$output['message'] = '成功';
+		try 
+		{
+			if(
+				$this->request['ua_id']	==""||
+				$this->request['ua_status']	==""
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			$affected_rows  = $this->rechargenit->changeStatus(array($this->request['ua_id']), $this->request['ua_status'], $this->admin_data );
+			if($affected_rows  == 0)
+			{
+				$array = array(
+					'message' 	=>'无资料更新' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$output['affected_rows']= $affected_rows ;
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function withdrawalAuditList()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得提款列表';
+		$output['message'] = '成功';
+		$ary['limit'] = (isset($this->request['limit']))?$this->request['limit']:5;
+		$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
+		$start_time = (isset($this->request['start_time']))?$this->request['start_time']:'';
+		$end_time = (isset($this->request['end_time']))?$this->request['end_time']:'';
+		$u_account = (isset($this->request['u_account']))?$this->request['u_account']:'';
+		$order = (isset($this->request['order']))?$this->request['order']:array();
+		try 
+		{
+			$ary['start_time'] =  array('operator' => '>=' , 'value'=>$start_time); 
+			$ary['end_time'] =  array('operator' => '<=' , 'value'=>$end_time); 
+			$ary['u_account'] =  array('operator' => '<=' , 'value'=>$u_account); 
+			if(is_array($order) && count($order) >0)
+			{
+				$ary['order']=$order ;
+			}else
+			{
+				$ary['order'] = array(
+					'ua_add_datetime' =>	'DESC'
+				);
+			}
+			$ary['ua_type'] = array(
+				'value' => 3,
+				'operator' => "=",
+			);
+			
+			$output['body'] = $this->rechargenit->getList($ary);
+			$output['body']['actions'] = $this->admin->getActionlist($this->request['am_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function editAnnouncemet()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='更新公告';
+		$output['message'] = '更新成功';
+		$post = $this->input->post();
+		try
+		{
+			if(
+				$post['title'] =="" ||
+				$post['content'] =="" ||
+				$post['type'] =="" || 
+				$post['an_id'] =="" 
+			){
+				$array = array(
+					'message' 	=>'必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$ary  =array(
+				'an_title'=>$post['title'] ,
+				'an_content'=>$post['content'],
+				'an_type'=>$post['type'],
+				'an_id' =>$post['an_id']
+			);
+			$affected_rows  = $this->announcemet->update($ary);
+			
+			if($affected_rows == 0)
+			{
+				$array = array(
+					'message' 	=>'新增公告失败' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		$this->myfunc->gotoUrl('/admin/renterTemplates#!/user/announcemetList/',$output['message'] );
 	}
 	
 	public function getAnnouncemet()
@@ -197,18 +389,21 @@ class Api extends CI_Controller {
 	
 	public function addAnnouncemet()
 	{
+		
 		$output['status'] = 100;
 		$output['body'] =array();
 		$output['title'] ='新增公告';
 		$output['message'] = '成功新增';
-		try 
+		$post = $this->input->post();
+		try
 		{
 			if(
-				$this->request['title'] =="" ||
-				$this->request['content'] =="" 
+				$post['title'] =="" ||
+				$post['content'] =="" ||
+				$post['type'] =="" 
 			){
 				$array = array(
-					'message' 	=>'reponse 必傳參數為空' ,
+					'message' 	=>'必傳參數為空' ,
 					'type' 		=>'api' ,
 					'status'	=>'002'
 				);
@@ -217,10 +412,23 @@ class Api extends CI_Controller {
 				throw $MyException;
 			}
 			$ary  =array(
-				'an_title'=>$this->request['title'] ,
-				'an_content'=>$this->request['content']
+				'an_title'=>$post['title'] ,
+				'an_content'=>$post['content'],
+				'an_type'=>$post['type']
 			);
-			$this->announcemet->add($ary);
+			$affected_rows = $this->announcemet->add($ary);
+			
+			if($affected_rows == 0)
+			{
+				$array = array(
+					'message' 	=>'新增公告失败' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();
@@ -230,8 +438,7 @@ class Api extends CI_Controller {
 			$output['status'] = $parames['status']; 
 			$this->myLog->error_log($parames);
 		}
-		
-		$this->response($output);
+		$this->myfunc->gotoUrl('/admin/renterTemplates#!/user/announcemetList/',$output['message'] );
 	}
 	
 	public function getAnnouncemetList()
@@ -243,15 +450,25 @@ class Api extends CI_Controller {
 		$output['message'] = '成功取得';
 		$ary['limit'] = (isset($this->request['limit']))?$this->request['limit']:5;
 		$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
+		$an_type = (isset($this->request['type']))?$this->request['type']:'';
 		$start_time = (isset($this->request['start_time']))?$this->request['start_time']:'';
 		$end_time = (isset($this->request['end_time']))?$this->request['end_time']:'';
+		$order= (isset($this->request['order']))?$this->request['order']:array();
 		try 
 		{
 			$ary['start_time'] =  array('operator' => '>=' , 'value'=>$start_time); 
 			$ary['end_time'] =  array('operator' => '<=' , 'value'=>$end_time); 
-			$ary['order'] = array(
-				'an_datetime' =>	'DESC'
-			);
+			$ary['an_type'] =  array('operator' => '=' , 'value'=>$an_type); 
+			// var_dump($ary);
+			if(count($order)>0)
+			{
+				$ary['order'] =$order;
+			}
+			else{
+				$ary['order'] = array(
+					'an_datetime' =>	'DESC'
+				);
+			}
 			$output['body'] = $this->announcemet->getList($ary);
 			$output['body']['actions'] = $this->admin->getActionlist($this->request['am_id']);
 		}catch(MyException $e)
@@ -414,6 +631,7 @@ class Api extends CI_Controller {
 	
 	private function checkPermissions()
 	{
+		$post = $this->input->post();
 		$nocheck = array(
 			'login',
 			'logout',
@@ -423,7 +641,7 @@ class Api extends CI_Controller {
 		);
 		if(!in_array($this->uri->segment(2), $nocheck))
 		{
-			if($this->request['am_id']=="")
+			if($this->request['am_id']=="" && $post['am_id'] =="")
 			{
 				$array = array(
 					'message' 	=>'reponse 必傳參數為空' ,
@@ -775,7 +993,76 @@ class Api extends CI_Controller {
 		$this->response($output);
 	}
 	
-	public function setUserPasswd()
+	public function setMoneyPasswdForm()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得修改使用者密码表单';
+		$output['message'] = '成功取得';
+		try 
+		{
+			if(
+				$this->request['u_id']	==""
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			$output['body']['user'] = $this->user->getUserByID($this->request['u_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	
+	public function setUserPasswdForm()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='取得修改使用者密码表单';
+		$output['message'] = '成功取得';
+		try 
+		{
+			if(
+				$this->request['u_id']	==""
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+			$output['body']['user'] = $this->user->getUserByID($this->request['u_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function doSetUserPasswd()
 	{
 		$output['status'] = 100;
 		$output['body'] =array();
@@ -828,6 +1115,19 @@ class Api extends CI_Controller {
 				'u_passwd' =>$this->request['passwd'],
 				'u_id' =>$this->request['u_id'],
 			);
+			
+			$user = $this->user->getUserByID($u_id);
+			if($user['u_passwd'] == md5($this->request['passwd']))
+			{
+				$array = array(
+					'message' 	=>'不能与资金密码一致' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
 			$this->user->setUserPasswd($ary);
 
 		}catch(MyException $e)
@@ -864,7 +1164,6 @@ class Api extends CI_Controller {
 					$MyException->setParams($array);
 					throw $MyException;
 			}
-			// $this->user->getUserByID($ary['u_id']);
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();
@@ -931,7 +1230,19 @@ class Api extends CI_Controller {
 				'u_passwd' =>$this->request['passwd'],
 				'u_id' =>$this->request['u_id'],
 			);
-			$this->user->setUserPasswd($ary);
+			$user = $this->user->getUserByID($this->request['u_id']);
+			if($user['u_money_passwd'] == md5($this->request['passwd']))
+			{
+				$array = array(
+					'message' 	=>'不能与使用者密码一致' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$this->user->setMoneyPasswd($ary);
 
 		}catch(MyException $e)
 		{
@@ -1048,10 +1359,12 @@ class Api extends CI_Controller {
 		}
 	}
 	
-	public function checkAudit()
+	public function doRechargeAudit()
 	{
 		$output['status'] = 100;
-		$output['body'] =array();
+		$output['body'] =array(
+			'affected_rows' => 0
+		);
 		$output['title'] ='审核充值';
 		$output['message'] = '成功';
 	
@@ -1059,7 +1372,8 @@ class Api extends CI_Controller {
 		{
 			if(
 				$this->request['ua_id']	=="" ||
-				count($this->request['ua_id'])	==0
+				count($this->request['ua_id'])	==0 ||
+				$this->request['ua_status']	 ==""
 			)
 			{
 				$array = array(
@@ -1071,7 +1385,19 @@ class Api extends CI_Controller {
 				$MyException->setParams($array);
 				throw $MyException;
 			}	
-			$this->rechargenit->changeStatus($this->request['ua_id'],'allowed');
+			$affected_rows  = $this->rechargenit->changeStatus(array($this->request['ua_id']),$this->request['ua_status'], $this->admin_data);
+			if($affected_rows  ==0)
+			{
+				$array = array(
+					'message' 	=>'无资料更新' ,
+					'type' 		=>'api' ,
+					'status'	=>'999'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$output['body']['affected_rows'] =$affected_rows;
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();
@@ -1085,7 +1411,7 @@ class Api extends CI_Controller {
 		$this->response($output);
 	}
 	
-	public function  auditList()
+	public function  rechargeAuditList()
 	{
 		$output['status'] = 100;
 		$output['body'] =array();
@@ -1098,13 +1424,19 @@ class Api extends CI_Controller {
 			$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
 			$end_time = (isset($this->request['end_time']))?$this->request['end_time']:'';
 			$start_time = (isset($this->request['start_time']))?$this->request['start_time']:'';
+			$u_account = (isset($this->request['u_account']))?$this->request['u_account']:'';
 			
 			$ary['start_time'] =array('value' =>$start_time, 'operator' =>'>=');
 			$ary['end_time'] =array('value' =>$end_time, 'operator' =>'<=');
-			$ary['ua.ua_status'] = array('value' =>'audit', 'operator' =>'=');
+			$ary['u_account'] =array('value' =>$u_account, 'operator' =>'<=');
 			$ary['ua.ua_type'] =  array('value' =>'1', 'operator' =>'=');
 			$ary['ua.ua_value'] =  array('value' =>0, 'operator' =>'>');
-			$output['body'] = $this->rechargenit->getAccountAuditList($ary);
+			if(is_array($this->request['order']) && count($this->request['order'])>0)
+			{
+				$ary['order'] = $this->request['order'];
+			}
+			$output['body'] = $this->rechargenit->getList($ary);
+			$output['body']['actions'] = $this->admin->getActionlist($this->request['am_id']);
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();
@@ -1187,11 +1519,11 @@ class Api extends CI_Controller {
 		$this->response($output);
 	}
 	
-	public function getRechargenitInTypeList()
+	public function rechargeForm()
 	{
 		$output['status'] = 100;
 		$output['body'] =array();
-		$output['title'] ='取得充值类别项';
+		$output['title'] ='充值表单';
 		$output['message'] = '成功';
 		
 		try 
@@ -1210,7 +1542,7 @@ class Api extends CI_Controller {
 			}	
 			
 			$output['body']['options'] = $this->rechargenit->getTypeList('in', array(1));
-			$output['body']['user'] = $this->user->getUserAccountInfo($this->request['u_id']);
+			$output['body']['user'] = $this->user->getBalance($this->request['u_id']);
 			
 		}catch(MyException $e)
 		{

@@ -35,12 +35,16 @@ agApp.config(function($routeProvider){
 		templateUrl: templatePath+"setParent.html"+"?"+ Math.random(),
 		controller: "userCtrl",
 		cache: false,
-	}).when("/user/list/recharge/:u_id",{
-		templateUrl: templatePath+"recharge.html"+"?"+ Math.random(),
+	}).when("/user/list/rechargeForm/:u_id",{
+		templateUrl: templatePath+"rechargeForm.html"+"?"+ Math.random(),
 		controller: "userCtrl",
 		cache: false,
-	}).when("/account/auditList/",{
-		templateUrl: templatePath+"auditList.html"+"?"+ Math.random(),
+	}).when("/account/rechargeAuditList/",{
+		templateUrl: templatePath+"rechargeAuditList.html"+"?"+ Math.random(),
+		controller: "accountCtrl",
+		cache: false,
+	}).when("/account/withdrawalAuditList/",{
+		templateUrl: templatePath+"withdrawalAuditList.html"+"?"+ Math.random(),
 		controller: "accountCtrl",
 		cache: false,
 	}).when("/system/addAdmin/",{
@@ -65,8 +69,149 @@ agApp.config(function($routeProvider){
 		templateUrl: templatePath+"announcemeEditForm.html"+"?"+ Math.random(),
 		controller: "userCtrl",
 		cache: false,
+	}).when("/account/withdrawalRecordList/",{
+		templateUrl: templatePath+"withdrawalRecordList.html"+"?"+ Math.random(),
+		controller: "accountCtrl",
+		cache: false,
+	}).when("/website/bigBannerList",{
+		templateUrl: templatePath+"bigBannerList.html"+"?"+ Math.random(),
+		controller: "websiteCtrl",
+		cache: false,
+	}).when("/website/addBigBanner",{
+		templateUrl: templatePath+"addBigBanner.html"+"?"+ Math.random(),
+		controller: "websiteCtrl",
+		cache: false,
 	})
 });
+var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $rootScope)
+{
+	$scope.data={
+		actions:{},
+		from_post :{},
+		posturl :''
+	}
+	
+	$scope.addBigBannerInit = function()
+	{
+		$scope.data.am_id =$('input[name=am_id]', parent.document).val();
+		$scope.data.posturl ='/Api/addBigBalance?sess='+$cookies.get('sess');
+	}
+	
+	$scope.bigBannerListInit = function()
+	{
+		var obj={};
+		var promise = apiService.adminApi('/getActionList', obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.actions = r.data.body.actionlist;
+				}else
+				{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+		
+	$scope.search = function()
+	{
+		var obj ={
+			p	:$scope.data.p,
+			order:$scope.data.order
+		};
+		
+		if(typeof $scope.data.search !="undefined")
+		{
+			$.each($scope.data.search,function(i,e){
+				obj[i] = e;
+			})
+		}
+		
+		if(typeof $scope.data.search !="undefined" && typeof $scope.data.search.start_time !="undefined" && typeof $scope.data.search.end_time !="undefined")
+		{
+			if($scope.data.search.start_time > $scope.data.search.end_time )
+			{
+				var obj =
+				{
+					'message' :'起始时间要小于结束时间',
+					buttons: 
+					[
+						{
+							text: "close",
+							click: function() 
+							{
+								$( this ).dialog( "close" );
+							}
+						}
+					]
+				};
+				dialog(obj);
+				return false;
+			}
+		}
+		var promise = apiService.adminApi($scope.data.router, obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.list = r.data.body.list;
+					$scope.pageinfo = r.data.body.pageinfo;
+					$scope.data.actions = r.data.body.actions;
+				}else
+				{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+}
+agApp.controller('websiteCtrl',  ['$scope', '$http' ,'apiService', '$cookies', '$routeParams', '$rootScope', websiteCtrl]);
 
 var indexCtrl = function($scope, $http, $rootScope){
 	var obj =
@@ -86,6 +231,7 @@ agApp.controller('indexCtrl',  ['$scope', '$http' ,'$rootScope', indexCtrl]);
 
 var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $rootScope){
 
+
 	$scope.data ={
 		root_id:$routeParams.root_id,
 		menulist: $cookies.getObject('menulist'),
@@ -101,8 +247,123 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 		u_id:'',
 		balance :0,
 		remarks :'',
-		router:''
+		router:'',
+		order:{}
 	};
+	
+	
+	$scope.search_click = function()
+	{
+		$scope.data.p= 1;
+		$scope.search();
+	}
+	
+	$scope.orderClick = function(order_key)
+	{
+
+		if( typeof $scope.data.order[order_key] =='undefined')
+		{
+			$scope.data.order[order_key] ='DESC';
+		}else if($scope.data.order[order_key] =='DESC'){
+			$scope.data.order[order_key] ='ASC';
+		}else
+		{
+			$scope.data.order[order_key] ='DESC';
+		}
+		$scope.data.p=1;
+		$scope.search();
+	}
+	
+	$scope.addAnnouncemetInit = function()
+	{
+		$scope.data.am_id =$('input[name=am_id]', parent.document).val();
+		$scope.data.posturl="/Api/addAnnouncemet?sess="+$cookies.get('sess');
+	}
+	
+	$scope.setMoneyPasswdInit = function()
+	{
+		var obj={
+			u_id:$routeParams.u_id
+		};
+		var promise = apiService.adminApi('/setMoneyPasswdForm', obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.user = r.data.body.user;
+				}else{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.setUserPasswdInit = function()
+	{
+		var obj={
+			u_id:$routeParams.u_id
+		};
+		var promise = apiService.adminApi('/setUserPasswdForm', obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.user = r.data.body.user;
+				}else{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.buttonClick = function(action)
+	{
+		$('input[name=am_id]', parent.document).val(action.id);
+	}
 	
 	$scope.editAnnouncemetClick = function(router)
 	{
@@ -134,7 +395,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 							}
 						]
 					};
-										dialog(obj);
+					dialog(obj);
 				}else{
 					var obj =
 					{
@@ -164,6 +425,9 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	
 	$scope.announcemeEditFormInit = function()
 	{
+		$scope.data.am_id =$('input[name=am_id]', parent.document).val();
+		$scope.data.posturl="/Api/editAnnouncemet?sess="+$cookies.get('sess');
+		$scope.data.front_image_url =FRONT_URL+'images/announcemet/';
 		$scope.data.an_id = $routeParams.an_id;
 		var obj ={
 			an_id :	$scope.data.an_id
@@ -176,6 +440,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 				if(r.data.status =="100")
 				{
 					$scope.data.row = r.data.body.row;
+
 				}else{
 					var obj =
 					{
@@ -456,7 +721,8 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 								click: function() 
 								{
 									$( this ).dialog( "close" );
-									location.href="/admin/renterTemplates#!/account/auditList/";
+									$('input[name=am_id]', parent.document).val('19');
+									location.href="/admin/renterTemplates#!/account/rechargeAuditList/";
 								}
 							}
 						]
@@ -488,13 +754,13 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 			}
 		)
 	}
-	$scope.rechargenit = function()
+	$scope.rechargeInit = function()
 	{
 		$scope.data.u_id= $routeParams.u_id;
 		var obj = {
 			u_id :$scope.data.u_id
 		};
-		var promise = apiService.adminApi('/getRechargenitInTypeList', obj);
+		var promise = apiService.adminApi('/rechargeForm', obj);
 		promise.then
 		(
 			function(r) 
@@ -573,7 +839,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 		var obj ={
 			u_id :u_id
 		};
-		$scope.api('/setUserPasswd',obj);
+		$scope.api('/doSetUserPasswd',obj);
 	}
 	
 	$scope.setMoneyPasswd = function()
@@ -721,6 +987,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 									click: function() 
 									{
 										$( this ).dialog( "close" );
+									$('input[name=am_id]', parent.document).val('2');
 										location.href="/admin/renterTemplates#!/user/list/";
 									}
 								}
@@ -768,52 +1035,12 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	
 	$scope.init = function()
 	{
+		$('input[name=am_id]', parent.document).val('2');
 		if(typeof $scope.data.u_account=="undefined")
 		{
 			$scope.data.u_account='';
 		}
 		$scope.search();
-		
-		if(typeof $routeParams.u_id !='undefined')
-		{
-			var obj ={
-				u_id : $routeParams.u_id
-			};
-			var promise = apiService.adminApi('/getUserByID',obj);
-			promise.then
-			(
-				function(r) 
-				{
-					if(r.data.status =="100")
-					{
-						$scope.data.user = r.data.body.user;
-					}else
-					{
-						var obj =
-						{
-							'message' :r.data.message,
-							buttons: 
-							[
-								{
-									text: "close",
-									click: function() 
-									{
-										$( this ).dialog( "close" );
-									}
-								}
-							]
-						};
-						dialog(obj);
-					}
-				},
-				function() {
-					var obj ={
-						'message' :'系統錯誤'
-					};
-					 dialog(obj);
-				}
-			)	
-		}	
 	}
 	
 	$scope.reset= function()
@@ -831,9 +1058,11 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	
 	$scope.search = function()
 	{
-		var obj = {
-			p :$scope.data.p,
-		}
+		var obj ={
+			p	:$scope.data.p,
+			order:$scope.data.order
+		};
+		
 		if(typeof $scope.data.search !="undefined")
 		{
 			$.each($scope.data.search,function(i,e){
@@ -907,16 +1136,129 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 	$scope.data=
 	{
 		list :{},
-		p:1
+		p:1,
+		search:{},
+		search_api:'',
+		order:{}
 	};
+	
+	$scope.orderClick = function(order_key)
+	{
+		if( typeof $scope.data.order[order_key] =='undefined')
+		{
+			$scope.data.order[order_key] ='DESC';
+		}else if($scope.data.order[order_key] =='DESC'){
+			$scope.data.order[order_key] ='ASC';
+		}else
+		{
+			$scope.data.order[order_key] ='DESC';
+		}
+		$scope.search();
+	}
+	
+	$scope.withdrawalRecordListInit = function()
+	{
+		$( ".datepicker" ).datepicker({ dateFormat:'yy-mm-dd' });
+		$scope.search();
+	}
+	
+	$scope.withdrawalAuditClick=function(action,ua_status,ua_id)
+	{
+		var obj =
+		{
+			'message' :'确认审核',
+			buttons: 
+			[
+				{
+					text: "是",
+					click: function() 
+					{
+						$('input[name=am_id]', parent.document).val(action.id);
+						var obj ={
+							ua_status :ua_status,
+							ua_id :ua_id
+						};
+						var promise = apiService.adminApi(action.router, obj);
+						$( this ).dialog( "close" );
+						promise.then
+						(
+							function(r) 
+							{
+								if(r.data.status =="100")
+								{
+									$('input[name=am_id]', parent.document).val('19');
+									var obj =
+									{
+										'message' :'成功更新',
+										buttons: 
+										[
+											{
+												text: "close",
+												click: function() 
+												{
+													$( this ).dialog( "close" );
+												}
+											}
+										]
+									};
+									dialog(obj);
+								}else
+								{
+									var obj =
+									{
+										'message' :r.data.message,
+										buttons: 
+										[
+											{
+												text: "close",
+												click: function() 
+												{
+													$( this ).dialog( "close" );
+												}
+											}
+										]
+									};
+									dialog(obj);
+								}
+							},
+							function() {
+								var obj ={
+									'message' :'系統錯誤'
+								};
+								 dialog(obj);
+							}
+						)
+					}
+				},
+				{
+					text: "否",
+					click: function() 
+					{
+						$( this ).dialog( "close" );
+					}
+				}
+			]
+		};
+		dialog(obj);
+	}
+
+	
+	$scope.withdrawalAuditListInit = function()
+	{
+		$( ".datepicker" ).datepicker({ dateFormat:'yy-mm-dd' });
+		$scope.search();
+	}
 	
 	$scope.reset= function()
 	{
-		$scope.data.end_time='';
-		$scope.data.start_time='';
 		$scope.data.p =1;
-		$scope.search();
-		
+		$.each($scope.data.order,function(i,e){
+			$scope.data.order[i] ="";
+		})
+		$.each($scope.data.search,function(i,e){
+			$scope.data.search[i] ="";
+		})
+		$scope.search();	
 	}
 	
 	$scope.auditListInit = function()
@@ -935,37 +1277,15 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 		$scope.search();
 	}
 	
-	$scope.click = function(router)
+	
+	
+	$scope.checkRechargeAuditClick= function(action, ua_status, ua_id)
 	{
-		if($('.checkbox_u_id:checked').length == 0)
-		{
-			var obj =
-				{
-					'message' :'请选择要审核项目',
-					buttons: 
-					[
-						{
-							text: "close",
-							click: function() 
-							{
-								$( this ).dialog( "close" );
-							
-							}
-						}
-					]
-				};
-				dialog(obj);
-			return false;
-		}
-		
-		var ua_id = new Array();
-		$.each($('.checkbox_u_id:checked'), function(i, e){
-			ua_id.push($(e).val())
-		})
 		var postobj ={
-			ua_id : ua_id
+			ua_id : ua_id,
+			ua_status: ua_status
 		};
-		
+		$('input[name=am_id]', parent.document).val(action.id);
 		var obj =
 		{
 			message :'确认审核',
@@ -975,13 +1295,14 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 					text: "是",
 					click: function() 
 					{
-						var promise = apiService.adminApi(router, postobj);
+						var promise = apiService.adminApi(action.router, postobj);
 						promise.then
 						(
 							function(r) 
 							{
 								if(r.data.status =="100")
 								{
+									$('input[name=am_id]', parent.document).val('19');
 									var obj =
 									{
 										message :'审核成功',
@@ -992,7 +1313,6 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 												click: function() 
 												{
 													$( this ).dialog( "close" );
-													window.location.reload();
 												}
 											}
 										]
@@ -1041,11 +1361,12 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 		
 	}
 	
+	
+	
 	$scope.search = function()
 	{
 		
-		var nodes_id = $('input[type=hidden][name=nodes_id]', parent.document).val();
-		if($scope.data.end_time < $scope.data.start_time)
+		if($scope.data.search.end_time < $scope.data.search.start_time)
 		{
 			var obj =
 			{
@@ -1065,12 +1386,15 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 			return false;
 		}
 		var obj ={
-			nodes_id :nodes_id,
 			p	:$scope.data.p,
-			start_time : $scope.data.start_time,
-			end_time : $scope.data.end_time
+			order:$scope.data.order
 		};
-		var promise = apiService.adminApi('/auditList', obj);
+		
+		$.each($scope.data.search,function(i,e){
+			obj[i] =e;
+		})
+		
+		var promise = apiService.adminApi($scope.data.search_api, obj);
 		promise.then
 		(
 			function(r) 
@@ -1079,6 +1403,7 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 				{
 					$scope.data.list = r.data.body.list;
 					$scope.data.pages = r.data.body.pageinfo.pages;
+					$scope.data.actions = r.data.body.actions;
 				}else
 				{
 					var obj =
@@ -1457,7 +1782,7 @@ var apiService = function($http, $cookies)
 			var default_obj = {
 				am_id :am_id
 			};
-			var object = $.extend(postdata, default_obj);
+			var object = $.extend(default_obj, postdata);
 			return $http.post('/Api'+$router+'?sess='+sess, object ,  {headers: {'Content-Type': 'application/json'} });
 		}
     };

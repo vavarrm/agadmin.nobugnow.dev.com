@@ -46,6 +46,44 @@
 			return 	true   ;	
 		}
 		
+		public function getBalance($u_id)
+		{
+			try 
+			{
+				
+				$sql ="
+						SELECT   IFNULL(SUM(Balance),0)  AS balance FROM  (
+							SELECT ua_id , IFNULL(ua_value,0) AS Balance FROM user_account WHERE ua_u_id = ? AND ua_status = 'recorded'
+							UNION
+							SELECT ua_id , IFNULL(ua_value,0)*-1  AS Balance FROM user_account WHERE  ua_u_id = ? AND ua_status = 'payment'
+						) AS t";
+				$bind = array(
+					$u_id,
+					$u_id
+				);
+				$query = $this->db->query($sql, $bind);
+				$error = $this->db->error();
+				if($error['message'] !="")
+				{
+					$MyException = new MyException();
+					$array = array(
+						'message' 	=>$error['message'] ,
+						'type' 		=>'db' ,
+						'status'	=>'001'
+					);
+					
+					$MyException->setParams($array);
+					throw $MyException;
+				}
+				$row =  $query->row_array();
+				$query->free_result();
+				return $row;
+				
+			}catch(MyException $e)
+			{
+				throw $e;
+			}
+		}
 		
 		public function getUserAccountInfo($uid)
 		{
@@ -154,8 +192,7 @@
 		public function getUserByID($u_id)
 		{
 			$sql = "SELECT 
-						u_name,
-						u_account
+						*
 					FROM user WHERE u_id = ?";
 			$bind = array(
 				$u_id

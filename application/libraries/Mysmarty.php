@@ -47,7 +47,8 @@ class Mysmarty
 		$this->assign(array(
 			'content'	=>$tpl,
 			'randseed'	=>$this->randseed,
-			'website'	=>$website
+			'website'	=>$website,
+			'FRONT_URL'	=>$_SERVER['FRONT_URL']
 		));
 		$this->smarty->display($frame);
 	}
