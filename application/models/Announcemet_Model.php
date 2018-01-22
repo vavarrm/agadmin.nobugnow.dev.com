@@ -164,9 +164,6 @@
 				throw $MyException;
 			}
 			
-
-			
-			
 			return true;
 		}
 		

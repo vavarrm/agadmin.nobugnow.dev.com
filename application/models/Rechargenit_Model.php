@@ -15,11 +15,75 @@
 		{
 			try {
 				$this->db->trans_start();
+				
 				if(is_array($ary))
 				{
 					$str = join("','", $ary);
+				};
+				if($status== 'payment')
+				{
+					$sql =" SELECT 
+							(
+								SELECT COUNT(*) 
+								FROM  
+									user_account 
+								WHERE 
+									ua_u_id = ua.ua_u_id  AND 
+									DATE_FORMAT(NOW(),'%Y-%m-%d') =  DATE_FORMAT(ua_upd_date,'%Y-%m-%d') 
+									AND ua_status = 'payment'
+							) AS today_payment_number,
+							(
+								SELECT IFNULL(0,SUM(ua_value)) 
+								FROM  
+									user_account 
+								WHERE 
+									ua_u_id = ua.ua_u_id  AND 
+									DATE_FORMAT(NOW(),'%Y-%m-%d') =  DATE_FORMAT(ua_upd_date,'%Y-%m-%d') 
+									AND ua_status = 'payment'
+							) AS today_payment_value
+							FROM 
+								 user_account AS ua
+							WHERE 
+							ua.ua_id IN ('".$str."')";
+					$query = $this->db->query($sql, $bind);
+					$error = $this->db->error();
+					if($error['message'] !="")
+					{
+						$MyException = new MyException();
+						$array = array(
+							'message' 	=>$error['message'] ,
+							'type' 		=>'db' ,
+							'status'	=>'001'
+						);
+						
+						$MyException->setParams($array);
+						throw  $MyException;
+						
+					}
+					$rows = $query->result_array();
+					if(!empty($rows))
+					{
+						foreach($rows as $row)
+						{;
+							if($row['today_payment_number'] >3 || $row['today_payment_value'] >=300000)
+							{
+								$MyException = new MyException();
+								$array = array(
+									'message' 	=>'提款超过限制，一天只能出款三次，最高额度为300000',
+									'type' 		=>'db' ,
+									'status'	=>'999'
+								);
+								
+								$MyException->setParams($array);
+								throw  $MyException;
+								break;
+							}
+						}
+					}
 				}
-				$sql = sprintf("UPDATE user_account SET ua_status = ?  WHERE ua_id IN('%s')", $str);
+				
+				
+				$sql = "UPDATE user_account SET ua_status = ? ,  ua_upd_date = DATE_FORMAT(NOW(),'%Y-%m-%d')  WHERE ua_id IN('".$str."')";
 				$bind =  array(
 					$status
 				);
@@ -35,6 +99,7 @@
 					);
 					
 					$MyException->setParams($array);
+					throw  $MyException;
 				}
 				$affected_rows =  $this->db->affected_rows();
 				
@@ -61,6 +126,7 @@
 							);
 							
 							$MyException->setParams($array);
+							throw  $MyException;
 						}
 					}
 				}
@@ -130,10 +196,6 @@
 			$sql = "SELECT
 						u.u_account,
 						CASE
-							WHEN ua.ua_type = '3' THEN ua.ua_value*-1
-							ELSE ua.ua_value
-						END AS ua_value_show,
-							CASE
 							WHEN  ua_status = 'noAllowed' THEN '拒绝'
 							WHEN  ua_status = 'audit' THEN '审核中'
 							WHEN  ua_status = 'payment' THEN '已出款'
@@ -142,7 +204,30 @@
 						ua.*,
 						ad.*,
 						ub.*,
-						bi.*
+						bi.*,
+						(
+							SELECT COUNT(*) 
+							FROM  
+								user_account 
+							WHERE 
+								ua_u_id = ua.ua_u_id  AND 
+								DATE_FORMAT(NOW(),'%Y-%m-%d') =  DATE_FORMAT(ua_upd_date,'%Y-%m-%d') 
+								AND ua_status = 'payment'
+						) AS today_payment_number,
+						(
+							SELECT IFNULL(0,SUM(ua_value)) 
+							FROM  
+								user_account 
+							WHERE 
+								ua_u_id = ua.ua_u_id  AND 
+								DATE_FORMAT(NOW(),'%Y-%m-%d') =  DATE_FORMAT(ua_upd_date,'%Y-%m-%d') 
+								AND ua_status = 'payment'
+						) AS today_payment_value,
+						CASE
+							WHEN  ua_status = 'payment' THEN '1'
+							WHEN  ua_status = 'stopPayment' THEN '1'
+							ELSE '0'
+						END AS 	withdrawal_disabled 
 					FROM 
 						user_account AS ua 
 							INNER JOIN user AS u  ON ua.ua_u_id = u.u_id
@@ -175,6 +260,7 @@
 				);
 				
 				$MyException->setParams($array);
+				throw  $MyException;
 			}
 			return $output;
 		}
@@ -260,6 +346,7 @@
 				);
 				
 				$MyException->setParams($array);
+				throw  $MyException;
 			}
 			return $output;
 		}
@@ -291,6 +378,7 @@
 				);
 				
 				$MyException->setParams($array);
+				throw  $MyException;
 			}
 			
 			$error = $this->db->error();
@@ -338,6 +426,7 @@
 				);
 				
 				$MyException->setParams($array);
+				throw  $MyException;
 			}
 			return $rows ;
 		}

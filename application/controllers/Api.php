@@ -19,6 +19,7 @@ class Api extends CI_Controller {
 		$this->load->model('Rechargenit_Model', 'rechargenit');
 		$this->load->model('Announcemet_Model', 'announcemet');
 		$this->load->model('Banner_Model', 'banner');
+		$this->load->model('Website_Model', 'website');
 
 		$output['status'] = 100;
 		$output['body'] =array();
@@ -113,13 +114,10 @@ class Api extends CI_Controller {
 				$MyException->setParams($array);
 				throw $MyException;
 			}
-			// $ary  =array(
-				// 'an_title'=>$post['title'] ,
-				// 'an_content'=>$post['content'],
-				// 'an_type'=>$post['type'],
-				// 'an_id' =>$post['an_id']
-			// );
-			$affected_rows  = $this->banner->addBig($ary);
+			$ary  =array(
+				'bb_order'=>$post['order'] ,
+			);
+			$affected_rows  = $this->banner->add($ary);
 			
 			if($affected_rows == 0)
 			{
@@ -144,6 +142,230 @@ class Api extends CI_Controller {
 		$this->myfunc->gotoUrl('/admin/renterTemplates#!/website/bigBannerList',$output['message'] );
 	}
 	
+	public function editBigBalance()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='更新banner';
+		$output['message'] = '更新成功';
+		$post = $this->input->post();
+		try
+		{
+			if(
+				$post['bb_order'] =="" || 
+				$post['bb_id'] =="" 
+			){
+				$array = array(
+					'message' 	=>'必傳參數為空11' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$ary  =array(
+				'bb_order'=>$post['bb_order'] ,
+				'bb_id'=>$post['bb_id'],
+			);
+			$affected_rows  = $this->banner->update($ary);
+			
+			if($affected_rows == 0)
+			{
+				$array = array(
+					'message' 	=>'更新公告失败' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		$this->myfunc->gotoUrl('/admin/renterTemplates#!/website/bigBannerList/',$output['message'] );
+	}
+	
+	
+	public function editFooter()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='更新连结';
+		$output['message'] = '更新成功';
+		$post = $this->input->post();
+		try
+		{
+			if(
+				$post['wechat_account'] =="" || 
+				$post['qq_account'] =="" 
+			){
+				$array = array(
+					'message' 	=>'必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			$ary  =array(
+				'wechat_account'=>$post['wechat_account'] ,
+				'qq_account'=>$post['qq_account'],
+			);
+			$affected_rows  = $this->website->updFooter($ary);
+			
+			if($affected_rows == 0)
+			{
+				$array = array(
+					'message' 	=>'更新失败' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}	
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		$this->myfunc->gotoUrl('/admin/renterTemplates#!/website/editFooter/',$output['message'] );
+	}
+	
+	public function editFooterInit()
+	{
+		$output['status'] = 100;
+		$output['body'] =array(
+		);
+		$output['title'] ='推广连结设定页';
+		$output['message'] = '取得成功';
+		
+		
+		try 
+		{
+			$ary = array(
+				'wechat_account',
+				'wechat_qr_image',
+				'qq_account',
+				'qq_qr_image'
+			);
+			$rows = $this->website->getListByKey($ary);
+			if(empty($rows['list']))
+			{
+				$array = array(
+					'message' 	=>'取得资料失败' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			
+			foreach($rows['list'] as $key =>$value)
+			{
+				$output['body']['list'][$value['we_key']] = $value;
+			}
+			
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function delBigBanner()
+	{
+		$output['status'] = 100;
+		$output['body'] =array();
+		$output['title'] ='刪除轮播图';
+		$output['message'] = '刪除成功';
+		try 
+		{
+			if(
+				!is_array($this->request['bb_id']) ||
+				count($this->request['bb_id']) == 0
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$this->banner->del($this->request['bb_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
+	public function editBigBalanceInit()
+	{
+		$output['status'] = 100;
+		$output['body'] =array(
+		);
+		$output['title'] ='修改大圖';
+		$output['message'] = '执行成功';
+		
+		
+		try 
+		{
+			if(
+				$this->request['bb_id']	==""
+			){
+				$array = array(
+					'message' 	=>'reponse 必傳參數為空' ,
+					'type' 		=>'api' ,
+					'status'	=>'002'
+				);
+				$MyException = new MyException();
+				$MyException->setParams($array);
+				throw $MyException;
+			}
+			$output['body']['row'] = $this->banner->getRow($this->request['bb_id']);
+		}catch(MyException $e)
+		{
+			$parames = $e->getParams();
+			$parames['class'] = __CLASS__;
+			$parames['function'] = __function__;
+			$output['message'] = $parames['message']; 
+			$output['status'] = $parames['status']; 
+			$this->myLog->error_log($parames);
+		}
+		
+		$this->response($output);
+	}
+	
 	public function bigBannerList()
 	{
 		$output['status'] = 100;
@@ -151,9 +373,17 @@ class Api extends CI_Controller {
 		);
 		$output['title'] ='大圖輪播列表';
 		$output['message'] = '执行成功';
+		
+		$ary['limit'] = (isset($this->request['limit']))?$this->request['limit']:5;
+		$ary['p'] = (isset($this->request['p']))?$this->request['p']:1;
+		$start_time = (isset($this->request['start_time']))?$this->request['start_time']:'';
+		$end_time = (isset($this->request['end_time']))?$this->request['end_time']:'';
+		$order = (isset($this->request['order']))?$this->request['order']:array();
+		
 		try 
 		{
-
+			$ary['order']=$order ;
+			$output['body'] = $this->banner->getList($ary);
 		}catch(MyException $e)
 		{
 			$parames = $e->getParams();
@@ -190,6 +420,21 @@ class Api extends CI_Controller {
 				$MyException->setParams($array);
 				throw $MyException;
 			}	
+			
+			// if(
+				// $this->request['ua_status']	=="payment" ||
+				// $this->request['ua_status']	=="stopPayment" 
+			// ){
+				// $array = array(
+					// 'message' 	=>'已出款拒绝出款不能在修改' ,
+					// 'type' 		=>'api' ,
+					// 'status'	=>'999'
+				// );
+				// $MyException = new MyException();
+				// $MyException->setParams($array);
+				// throw $MyException;
+			// }
+			
 			$affected_rows  = $this->rechargenit->changeStatus(array($this->request['ua_id']), $this->request['ua_status'], $this->admin_data );
 			if($affected_rows  == 0)
 			{
@@ -1301,6 +1546,8 @@ class Api extends CI_Controller {
 		} 
 		return $tree;
 	}
+	
+	
 	
 	public function getUserAccount()
 	{

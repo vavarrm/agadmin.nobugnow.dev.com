@@ -8,6 +8,16 @@
 			$this->load->database();
 		}
 		
+		public function getMenuList($ary)
+		{
+			
+		}
+		
+		private function getChild()
+		{
+			// $
+		}
+		
 		public function adminList($ary = array())
 		{
 			$where .=" WHERE 1 = 1";

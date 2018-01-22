@@ -1,12 +1,16 @@
-<input type="hidden"  ng-model="data.router" ng-init="data.router ='/bigBannerList'">
-<div  ng-init="bigBannerListInit()">
+<input type="hidden"  ng-model="data.router" ng-init="data.router ='/getAnnouncemetList'">
+<div  ng-init="announcemetListinit()">
 	<div class="grid_3 grid_4">
 		<div class="grid-form1">
 			<form class="form-inline">
 			<div class="form-group">
 				<label class="sr-only" for="exampleInputPassword3"></label>
 				时间：<input type="text" ng-model="data.search.start_time" class="form-control datepicker" >~<input type="text" ng-model="data.search.end_time" class="form-control datepicker" >
-			</div>
+			</div><p>
+			<div class="form-group">
+				活动：<input type="radio" name="an_type" ng-click="search_click();" ng-model="data.search.type" value="action">
+				平台：<input type="radio" name="an_type" ng-click="search_click();" ng-model="data.search.type" value="public">
+			</div><p>
 			<div class="form-group">
 				<button type="submit" class="btn btn-default" ng-click="search_click()">搜寻</button>
 				<button  class="btn btn-default" ng-click="reset()">清除搜寻条件</button>
@@ -16,7 +20,7 @@
 	</div>
 	<div class="grid_3 grid_4">
 		<div class="col-md-12 page_1">
-			<a href="/admin/renterTemplates#!/website{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
+			<a href="/admin/renterTemplates#!/user/announcemetList{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
 			<span ng-repeat-end></span>
 		</div>
 		<div class="clearfix"> </div>
@@ -28,25 +32,28 @@
 							<th width="2%" style="text-align:center" >
 								<input type="checkbox" ng-model="data.checkedAll" ng-init="data.checkedAll =0">
 							</th>
-							<th width="45%" style="text-align:center" >排序</th>
-							<th width="45%"  style="text-align:center">
-								<a href="" ng-click="orderClick('bb_add_datetime');$event.preventDefault();">发怖日</a> 
-								<i  ng-show="data.order.bb_add_datetime=='DESC'" class="fa fa-chevron-down" aria-hidden="true"></i>
-								<i  ng-show="data.order.bb_add_datetimee=='ASC'"  class="fa fa-chevron-up" aria-hidden="true"></i>
+							<th width="10%" style="text-align:center" >标题</th>
+							<th width="5%" style="text-align:center" >类型</th>
+							<th width="50%" style="text-align:center">内容</th>
+							<th width="10%"  style="text-align:center">
+								<a href="" ng-click="orderClick('an_datetime');$event.preventDefault();">发怖日</a> 
+								<i  ng-show="data.order.an_datetime=='DESC'" class="fa fa-chevron-down" aria-hidden="true"></i>
+								<i  ng-show="data.order.an_datetime=='ASC'"  class="fa fa-chevron-up" aria-hidden="true"></i>
 							</th>
-							<th width="8%" style="text-align:center" ></th>
+							<th width="5%" style="text-align:center"></th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr ng-repeat="row in data.list">
 							<td valign="middle">
-								<input type="checkbox" ng-checked="data.checkedAll"  class="checkbox"   value="{{row.bb_id}}" >
+								<input type="checkbox" ng-checked="data.checkedAll"  class="checkbox"   value="{{row.an_id}}" >
 							</td>
-							<td valign="middle" ng-bind="row.bb_order"></td>
-							<td valign="middle" ng-bind="row.bb_add_datetime"></td>
-							<td valign="middle">
-								<a  ng-repeat-start="action in data.actions" href="/admin/renterTemplates#!/website{{action.router}}/{{row.bb_id}}" ng-click="actionClick($event, action.func)"  ng-if="action.type=='button'" type="button" class="btn btn-xs btn-default" ng-bind="action.title">新增</a>
-								<span ng-repeat-end></span>
+							<td valign="middle" ng-bind="row.an_title"></td>
+							<td valign="middle" ng-bind="row.an_type_str"></td>
+							<td  valign="middle" ng-bind="row.an_content_shot"  ></td>
+							<td  valign="middle" ng-bind="row.an_datetime"  ></td>
+							<td>
+								<a href="/admin/renterTemplates#!/user/announcemetList{{action.router}}/{{row.an_id}}" ng-repeat="action in data.actions" ng-show="action.type=='button'" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
 							</td>
 						</tr>
 						</tr>

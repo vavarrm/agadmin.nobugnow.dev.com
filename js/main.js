@@ -81,14 +81,247 @@ agApp.config(function($routeProvider){
 		templateUrl: templatePath+"addBigBanner.html"+"?"+ Math.random(),
 		controller: "websiteCtrl",
 		cache: false,
+	}).when("/website/editBigBanner/:bb_id",{
+		templateUrl: templatePath+"editBigBanner.html"+"?"+ Math.random(),
+		controller: "websiteCtrl",
+		cache: false,
+	}).when("/website/editFooter/",{
+		templateUrl: templatePath+"editFooter.html"+"?"+ Math.random(),
+		controller: "websiteCtrl",
+		cache: false,
+	}).when("/admin/menuList/",{
+		templateUrl: templatePath+"menuList.html"+"?"+ Math.random(),
+		controller: "websiteCtrl",
+		cache: false,
 	})
 });
 var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $rootScope)
 {
+	$( ".datepicker" ).datepicker({ dateFormat:'yy-mm-dd' });
 	$scope.data={
 		actions:{},
 		from_post :{},
-		posturl :''
+		posturl :'',
+		list:{},
+		order:{},
+		p:1,
+		row:{}
+	}
+	
+	$scope.editFooterInit = function()
+	{
+		var obj ={};
+		var promise = apiService.adminApi('/editFooterInit', obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.row =r.data.body.list;
+					$scope.data.front_image_url =FRONT_URL+'images/webconfig/';
+					$scope.data.am_id =$('input[name=am_id]', parent.document).val();
+					$scope.data.posturl ='/Api/editFooter?sess='+$cookies.get('sess');
+				}else
+				{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.actionClick = function($event,func)
+	{
+		if( func !=null)
+		{
+			$event.preventDefault();
+			if(typeof $scope[func] =='function')
+			{
+				$scope[func]();
+			}
+		}
+		
+	}
+	
+	$scope.deleteBanner = function()
+	{
+		if($('.checkbox:checked').length =='0')
+		{
+			var obj =
+				{
+					'message' :'请选则要删除项',
+					buttons: 
+					[
+						{
+							text: "close",
+							click: function() 
+							{
+								$( this ).dialog( "close" );
+							}
+						}
+					]
+				};
+			dialog(obj);
+			return false;
+		}
+	
+		var obj =
+		{
+			'message' :'确认删除',
+			buttons: 
+			[
+				{
+					text: "是",
+					click: function() 
+					{
+						$( this ).dialog( "close" );
+						var bb_id = new Array();
+						$.each($('.checkbox:checked'), function(i, e){
+							bb_id.push($(e).val())
+						})
+						var obj={
+							bb_id :bb_id
+						}
+						var promise = apiService.adminApi('/delBigBanner', obj);
+						promise.then
+						(
+							function(r) 
+							{
+								if(r.data.status =="100")
+								{
+									var obj =
+									{
+										'message' :'刪除成功',
+										buttons: 
+										[
+											{
+												text: "close",
+												click: function() 
+												{
+													$( this ).dialog( "close" );
+													$scope.search();
+												}
+											}
+										]
+									};
+									dialog(obj);
+								}else{
+									var obj =
+									{
+										'message' :r.data.message,
+										buttons: 
+										[
+											{
+												text: "close",
+												click: function() 
+												{
+													$( this ).dialog( "close" );
+												}
+											}
+										]
+									};
+									dialog(obj);
+								}
+							},
+							function() {
+								var obj ={
+									'message' :'系統錯誤'
+								};
+								 dialog(obj);
+							}
+						)
+					}
+				},
+				{
+					text: "否",
+					click: function() 
+					{
+						$( this ).dialog( "close" );
+					}
+				}
+			]
+		};
+		dialog(obj);
+	}
+	
+	$scope.editBigBannerInit = function()
+	{
+		$scope.data.front_image_url =FRONT_URL+'images/big_banner/';
+		var obj={
+			bb_id : $routeParams.bb_id
+		};
+		var promise = apiService.adminApi('/editBigBalanceInit', obj);
+		promise.then
+		(
+			function(r) 
+			{
+				if(r.data.status =="100")
+				{
+					$scope.data.row =r.data.body.row;
+					$scope.data.am_id =$('input[name=am_id]', parent.document).val();
+					$scope.data.posturl ='/Api/editBigBalance?sess='+$cookies.get('sess');
+				}else
+				{
+					var obj =
+					{
+						'message' :r.data.message,
+						buttons: 
+						[
+							{
+								text: "close",
+								click: function() 
+								{
+									$( this ).dialog( "close" );
+								}
+							}
+						]
+					};
+					dialog(obj);
+				}
+			},
+			function() {
+				var obj ={
+					'message' :'系統錯誤'
+				};
+				 dialog(obj);
+			}
+		)
+	}
+	
+	$scope.orderClick = function(order_key)
+	{
+
+		if( typeof $scope.data.order[order_key] =='undefined')
+		{
+			$scope.data.order[order_key] ='DESC';
+		}else if($scope.data.order[order_key] =='DESC'){
+			$scope.data.order[order_key] ='ASC';
+		}else
+		{
+			$scope.data.order[order_key] ='DESC';
+		}
+		$scope.data.p=1;
+		$scope.search();
 	}
 	
 	$scope.addBigBannerInit = function()
@@ -99,6 +332,7 @@ var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 	
 	$scope.bigBannerListInit = function()
 	{
+		$scope.search();
 		var obj={};
 		var promise = apiService.adminApi('/getActionList', obj);
 		promise.then
@@ -134,6 +368,7 @@ var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 				 dialog(obj);
 			}
 		)
+		
 	}
 	
 		
@@ -182,7 +417,6 @@ var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 				{
 					$scope.data.list = r.data.body.list;
 					$scope.pageinfo = r.data.body.pageinfo;
-					$scope.data.actions = r.data.body.actions;
 				}else
 				{
 					var obj =
@@ -1197,6 +1431,7 @@ var accountCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 												click: function() 
 												{
 													$( this ).dialog( "close" );
+													location.reload() ;
 												}
 											}
 										]

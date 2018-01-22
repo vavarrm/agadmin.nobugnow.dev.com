@@ -12,7 +12,8 @@
 	</div>
 	<div class="grid_3 grid_4">
 		<div class="col-md-12 page_1">
-			<a  ng-repeat="action in  data.actions" ng-click="heard_btn(action.id)" ng-if="action.type=='head_button'" href="/admin/renterTemplates#!/system{{action.router}}"  type="button" class="btn btn-lg btn-default" >新增帐号</a>
+			<a href="/admin/renterTemplates#!/user/announcemetList{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
+			<span ng-repeat-end></span>
 		</div>
 		<div class="clearfix"> </div>
 		<div class="but_list">
@@ -29,7 +30,9 @@
 						<tr ng-repeat="row in data.list">
 							<td valign="middle" ng-bind="row.ad_account"></td>
 							<td valign="middle" ng-bind="row.ar_name"></td>
-							<td valign="middle" ></td>
+							<td valign="middle" >
+								
+							</td>
 						</tr>
 					</tbody>
 				</table>  

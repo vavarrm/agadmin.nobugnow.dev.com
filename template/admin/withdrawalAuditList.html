@@ -23,27 +23,31 @@
 				<table class="table table-bordered">
 					<thead>
 						<tr>
-							<th  style="text-align:center">
+							<th  width="2%" style="text-align:center">
 								<a href="" ng-click="orderClick('u_account');$event.preventDefault();">充值帐号</a> 
 								<i  ng-show="data.order.u_account=='DESC'" class="fa fa-chevron-down" aria-hidden="true"></i>
 								<i  ng-show="data.order.u_account=='ASC'"  class="fa fa-chevron-up" aria-hidden="true"></i>
 							</th>
-							<th  style="text-align:center">
+							<th width="10%"  style="text-align:center">
 								提款人银行资料
-							<th  style="text-align:center">
+							</th>
+							<th width="2%"  style="text-align:center">
 								<a href="" ng-click="orderClick('ua_value');$event.preventDefault();">提款额</a> 
 								<i  ng-show="data.order.ua_value=='DESC'" class="fa fa-chevron-down" aria-hidden="true"></i>
 								<i  ng-show="data.order.ua_value=='ASC'"  class="fa fa-chevron-up" aria-hidden="true"></i>
 							</th>
-							<th  style="text-align:center">
-								<a href="" ng-click="orderClick('ua_status');$event.preventDefault();">状态</a> 
-								<i  ng-show="data.order.ua_status=='DESC'" class="fa fa-chevron-down" aria-hidden="true"></i>
-								<i  ng-show="data.order.ua_status=='ASC'"  class="fa fa-chevron-up" aria-hidden="true"></i>
+							<th width="2%"  style="text-align:center">
+								<a href="" ng-click="orderClick('ua_status_show');$event.preventDefault();">状态</a> 
+								<i  ng-show="data.order.ua_status_show=='DESC'" class="fa fa-chevron-down" aria-hidden="true"></i>
+								<i  ng-show="data.order.ua_status_show=='ASC'"  class="fa fa-chevron-up" aria-hidden="true"></i>
 							</th>
-							<th  style="text-align:center">
-								<a href="" ng-click="orderClick('ua_add_datetime');$event.preventDefault();">提款时间</a> 
+							<th width="5%"  style="text-align:center">
+								<a href="" ng-click="orderClick('ua_add_datetime');$event.preventDefault();">申请时间</a> 
 								<i  ng-show="data.order.ua_add_datetime=='DESC'" class="fa fa-chevron-down" aria-hidden="true"></i>
 								<i  ng-show="data.order.ua_add_datetime=='ASC'"  class="fa fa-chevron-up" aria-hidden="true"></i>
+							</th>
+							<th  width="5%" style="text-align:center">
+								本日提款次数/金額
 							</th>
 						</tr>
 					</thead>
@@ -60,15 +64,16 @@
 							</td>
 							<td valign="middle" ng-bind="row.ua_value"></td>
 							<td valign="middle" >
-								<select ng-model="row.ua_status" >
+								<select ng-model="row.ua_status" ng-disabled="row.withdrawal_disabled =='1'">
 									<option value="audit">未审核</option>
 									<option value="stopPayment">拒绝出款</option>
 									<option value="payment">已出款</option>
 								</select>
-								<a  ng-repeat-start="action in data.actions" ng-click="withdrawalAuditClick(action,row.ua_status,row.ua_id)" type="button" class="btn btn-xs btn-default" ng-bind="action.title">新增</a>
+								<a  ng-if="row.withdrawal_disabled !='1'" ng-repeat-start="action in data.actions" ng-click="withdrawalAuditClick(action,row.ua_status,row.ua_id)" type="button" class="btn btn-xs btn-default" ng-bind="action.title">新增</a>
 								<span ng-repeat-end></span>
 							</td>
 							<td valign="middle" ng-bind="row.ua_add_datetime"></td>
+							<td valign="middle"  ng-bind="row.today_payment_number+'/'+row.today_payment_value"></td>
 						</tr>
 					</tbody>
 				</table>  
