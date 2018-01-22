@@ -233,7 +233,7 @@
 							INNER JOIN user AS u  ON ua.ua_u_id = u.u_id
 							LEFT JOIN admin AS ad  ON ua.ua_from = ad.ad_id
 							LEFT JOIN user_bank_info AS ub ON ub.ub_id = ua_ub_id
-							LEFT JOIN bank_info AS bI ON ub.ub_bank_id = bi_id
+							LEFT JOIN bank_info AS bi ON ub.ub_bank_id = bi_id
 					";
 			$search_sql = $sql.$where.$order.$limit ;
 			$query = $this->db->query($search_sql, $bind);

@@ -8,14 +8,93 @@
 			$this->load->database();
 		}
 		
-		public function getMenuList($ary)
+		public function getMenuList($ary=array())
 		{
-			
+			try
+			{
+				if(empty($ary))
+				{
+					$MyException = new MyException();
+					$array = array(
+						'message' 	=>'參數有誤' ,
+						'type' 		=>'db' ,
+						'status'	=>'001'
+					);
+					
+					$MyException->setParams($array);
+					throw $MyException;
+				}
+				$sql="SELECT * FROM `admin_menu` WHERE am_id in('".join("','",$ary)."')";
+				$query = $this->db->query($sql);
+				$rows = $query->result_array();
+				$query->free_result();
+				$error = $this->db->error();
+				if($error['message'] !="")
+				{
+					$MyException = new MyException();
+					$array = array(
+						'message' 	=>$error['message'] ,
+						'type' 		=>'db' ,
+						'status'	=>'001'
+					);
+					
+					$MyException->setParams($array);
+					throw $MyException;
+				}
+				
+				$ary = array();
+				if(!empty($rows))
+				{
+					foreach($rows as $row)
+					{
+						$this->getChild($row['am_id'], $ary);
+					}
+				}
+				return $ary;
+			}catch(MyException $e)
+			{
+				throw $MyException;
+			}
 		}
 		
-		private function getChild()
+		private function getChild($am_id,&$ary=array())
 		{
-			// $
+			try
+			{
+				$sql ="SELECT * FROM  `admin_menu` WHERE `am_parent_id` = ?";
+				$bind = array($am_id);
+				$query = $this->db->query($sql,$bind);
+				$rows = $query->result_array();
+				$query->free_result();
+				$error = $this->db->error();
+				if($error['message'] !="")
+				{
+					$MyException = new MyException();
+					$array = array(
+						'message' 	=>$error['message'] ,
+						'type' 		=>'db' ,
+						'status'	=>'001'
+					);
+					
+					$MyException->setParams($array);
+					throw $MyException;
+				}
+				
+				if(!empty($rows))
+				{
+					foreach($rows as $row)
+					{
+						$ary = array_merge($ary,$row);
+						$this->getChild($row['am_id'], $ary);
+					}
+				}
+				
+			}catch(MyException $e)
+			{
+				throw $MyException;
+			}
+			// return 	$rows  ;
+			
 		}
 		
 		public function adminList($ary = array())
@@ -140,20 +219,30 @@
 				$ary['ad_passwd'],
 				$ary['ad_role'],
 			);
-			$query = $this->db->query($sql, $bind);
-			$error = $this->db->error();
-			if($error['message'] !="")
-			{
-				$MyException = new MyException();
-				$array = array(
-					'message' 	=>$error['message'] ,
-					'type' 		=>'db' ,
-					'status'	=>'001'
-				);
+			// $query = $this->db->query($sql, $bind);
+			// $error = $this->db->error();
+			// if($error['message'] !="")
+			// {
+				// $MyException = new MyException();
+				// $array = array(
+					// 'message' 	=>$error['message'] ,
+					// 'type' 		=>'db' ,
+					// 'status'	=>'001'
+				// );
 				
-				$MyException->setParams($array);
-				throw $MyException;
+				// $MyException->setParams($array);
+				// throw $MyException;
+			// }
+			
+			if($ary['ad_role'] !="1")
+			{
+				$default = array(
+					'2' =>array(1,11,30),
+					'3' =>array(1,30),
+				);
+				// $this->
 			}
+			
 			return 	$row['total'] ;
 		}
 		
