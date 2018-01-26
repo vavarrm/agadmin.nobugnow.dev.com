@@ -121,7 +121,7 @@ var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 					$scope.data.row =r.data.body.list;
 					$scope.data.front_image_url =FRONT_URL+'images/webconfig/';
 					$scope.data.am_id =$('input[name=am_id]', parent.document).val();
-					$scope.data.posturl ='/Admin/Api/editFooter?sess='+$cookies.get('sess');
+					$scope.data.posturl ='/admin/Api/editFooter?sess='+$cookies.get('sess');
 				}else
 				{
 					var obj =
@@ -279,7 +279,7 @@ var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 				{
 					$scope.data.row =r.data.body.row;
 					$scope.data.am_id =$('input[name=am_id]', parent.document).val();
-					$scope.data.posturl ='/Admin/Api/editBigBalance?sess='+$cookies.get('sess');
+					$scope.data.posturl ='/admin/Api/editBigBalance?sess='+$cookies.get('sess');
 				}else
 				{
 					var obj =
@@ -327,7 +327,7 @@ var websiteCtrl = function($scope, $http, apiService, $cookies, $routeParams, $r
 	$scope.addBigBannerInit = function()
 	{
 		$scope.data.am_id =$('input[name=am_id]', parent.document).val();
-		$scope.data.posturl ='/Admin/Api/addBigBalance?sess='+$cookies.get('sess');
+		$scope.data.posturl ='/admin/Api/addBigBalance?sess='+$cookies.get('sess');
 	}
 	
 	$scope.bigBannerListInit = function()
@@ -511,7 +511,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	$scope.addAnnouncemetInit = function()
 	{
 		$scope.data.am_id =$('input[name=am_id]', parent.document).val();
-		$scope.data.posturl="/Admin/Api/addAnnouncemet?sess="+$cookies.get('sess');
+		$scope.data.posturl="/admin/Api/addAnnouncemet?sess="+$cookies.get('sess');
 	}
 	
 	$scope.setMoneyPasswdInit = function()
@@ -660,7 +660,7 @@ var userCtrl = function($scope, $http, apiService, $cookies, $routeParams, $root
 	$scope.announcemeEditFormInit = function()
 	{
 		$scope.data.am_id =$('input[name=am_id]', parent.document).val();
-		$scope.data.posturl="/Admin/Api/editAnnouncemet?sess="+$cookies.get('sess');
+		$scope.data.posturl="/admin/Api/editAnnouncemet?sess="+$cookies.get('sess');
 		$scope.data.front_image_url =FRONT_URL+'images/announcemet/';
 		$scope.data.an_id = $routeParams.an_id;
 		var obj ={
@@ -2018,7 +2018,7 @@ var apiService = function($http, $cookies)
 				am_id :am_id
 			};
 			var object = $.extend(default_obj, postdata);
-			return $http.post('/Admin/Api'+$router+'?sess='+sess, object ,  {headers: {'Content-Type': 'application/json'} });
+			return $http.post('/admin/Api'+$router+'?sess='+sess, object ,  {headers: {'Content-Type': 'application/json'} });
 		}
     };
 }
