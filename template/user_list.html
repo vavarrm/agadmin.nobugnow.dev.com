@@ -1,0 +1,73 @@
+<input type="hidden"  ng-model="data.router" ng-init="data.router ='/userList'">
+<div  ng-init="init()" >
+	<div class="grid_3 grid_4">
+		<div class="grid-form1">
+			<form class="form-inline">
+			  <div class="form-group">
+				<label class="sr-only" for="exampleInputPassword3">使用者帳號</label>
+				<input type="text" ng-model="data.search.u_account"  class="form-control" placeholder="使用者帳號">
+			  </div>
+			  <button type="submit" class="btn btn-default" ng-click="search()">搜寻</button>
+			  <button  class="btn btn-default" ng-click="reset()">清除搜寻条件</button>
+			</form>
+		</div>
+	</div>
+	<div class="grid_3 grid_4">
+		<div class="col-md-12 page_1">
+			<a href="/admin/renterTemplates#!/user/list{{action.router}}" ng-repeat="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
+		</div>
+		<div class="clearfix"> </div>
+		<div class="but_list">
+			<div class="col-md-12 page_1">
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<th width="30%" style="text-align:center" >使用者帳號</th>
+							<th width="10%" style="text-align:center">上級</th>
+							<th width="60%" style="text-align:center">功能</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat-start="row in data.list">
+							<td valign="middle">
+								<i  ng-click="showChild(row,row.u_id)" ng-show ="row.u_superior_id =='0'>0" class="fa fa-minu" ng-class="row.u_have_child =='0'?'fa-minus':row.show=='false'?'fa-arrow-circle-down':'fa-arrow-circle-up'" aria-hidden="true"></i>
+								{{row.u_account}}
+							</td>
+							<td  valign="middle" ng-if="row.u_superior_id =='0'"  >總代號</td>
+							<td ng-if="row.u_superior_id !='0'"  ng-bind="row.superior_account"></td>
+							<td valign="middle">
+								<a href="/admin/renterTemplates#!/user/list{{action.router}}/{{row.u_id}}"  ng-click="buttonClick(action);" ng-repeat-start="action in data.actions" ng-show="action.type=='button' && action.id !=10" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
+								<d ng-repeat-end></d>
+							</td>
+						</tr>
+						<tr ng-repeat="node in row.nodes" ng-show="row.show==true">
+							<td  >
+								<span style="margin-left:20px;color:#999;font-size: 1em;"  ng-bind="node.u_account"></span>
+							</td>
+							<td>下级</td>
+							<td>
+								<a href="/admin/renterTemplates#!/user/list{{action.router}}/{{row.u_id}}" ng-repeat="action in data.actions" ng-show="action.type=='button' && action.id !=9" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
+							</td>
+						</tr>
+						<tr ng-repeat-end class="hidden">
+						</tr>
+					</tbody>
+				</table>  
+				<div>
+					<ul class="pagination pagination-sm">
+						<li  ng-class="data.p=='1'?'disabled':''">
+							<a ng-click="clickpage(data.p -1);$event.preventDefault();" href="#"><i class="fa fa-angle-left"></i></a>
+						</li>
+						<li  ng-class="($index +1)==data.p?'active':''" ng-repeat="n in [] | range:pageinfo.pages">
+							<a ng-click="clickpage($index +1);$event.preventDefault();" href="#" ng-bind="$index +1"></a>
+						</li>
+						<li ng-class="data.p==pageinfo.pages?'disabled':''">
+							<a ng-click="clickpage(data.p +1);$event.preventDefault();" href="#"><i class="fa fa-angle-right"></i></a>
+						</li>
+					</ul>	
+				</div>
+			</div>
+			<div class="clearfix"> </div>
+		</div>
+	</div>
+</div>
