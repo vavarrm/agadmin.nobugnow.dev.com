@@ -120,7 +120,7 @@
 					if(request['status'] =='100')
 					{
 						$.cookie('sess', request.body.sess, { path:'/'});
-						window.location ="/";
+						window.location ="/admin/";
 					}else
 					{
 						var obj = {
