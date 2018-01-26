@@ -20,7 +20,7 @@
 	</div>
 	<div class="grid_3 grid_4">
 		<div class="col-md-12 page_1">
-			<a href="/admin/renterTemplates#!/user/announcemetList{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
+			<a href="/admin/index.php?/Admin/renterTemplates#!/user/announcemetList{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
 			<span ng-repeat-end></span>
 		</div>
 		<div class="clearfix"> </div>
@@ -53,7 +53,7 @@
 							<td  valign="middle" ng-bind="row.an_content_shot"  ></td>
 							<td  valign="middle" ng-bind="row.an_datetime"  ></td>
 							<td>
-								<a href="/admin/renterTemplates#!/user/announcemetList{{action.router}}/{{row.an_id}}" ng-repeat="action in data.actions" ng-show="action.type=='button'" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
+								<a href="/admin/index.php?/Admin/renterTemplates#!/user/announcemetList{{action.router}}/{{row.an_id}}" ng-repeat="action in data.actions" ng-show="action.type=='button'" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
 							</td>
 						</tr>
 						</tr>

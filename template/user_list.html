@@ -14,7 +14,7 @@
 	</div>
 	<div class="grid_3 grid_4">
 		<div class="col-md-12 page_1">
-			<a href="/admin/renterTemplates#!/user/list{{action.router}}" ng-repeat="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
+			<a href="/admin/index.php?/Admin/renterTemplates#!/user/list{{action.router}}" ng-repeat="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
 		</div>
 		<div class="clearfix"> </div>
 		<div class="but_list">
@@ -36,7 +36,7 @@
 							<td  valign="middle" ng-if="row.u_superior_id =='0'"  >總代號</td>
 							<td ng-if="row.u_superior_id !='0'"  ng-bind="row.superior_account"></td>
 							<td valign="middle">
-								<a href="/admin/renterTemplates#!/user/list{{action.router}}/{{row.u_id}}"  ng-click="buttonClick(action);" ng-repeat-start="action in data.actions" ng-show="action.type=='button' && action.id !=10" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
+								<a href="/admin/index.php?/Admin/renterTemplates#!/user/list{{action.router}}/{{row.u_id}}"  ng-click="buttonClick(action);" ng-repeat-start="action in data.actions" ng-show="action.type=='button' && action.id !=10" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
 								<d ng-repeat-end></d>
 							</td>
 						</tr>
@@ -46,7 +46,7 @@
 							</td>
 							<td>下级</td>
 							<td>
-								<a href="/admin/renterTemplates#!/user/list{{action.router}}/{{row.u_id}}" ng-repeat="action in data.actions" ng-show="action.type=='button' && action.id !=9" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
+								<a href="/admin/index.php?/Admin/renterTemplates#!/user/list{{action.router}}/{{row.u_id}}" ng-repeat="action in data.actions" ng-show="action.type=='button' && action.id !=9" type="button" class="btn btn-xs btn-default" ng-bind="action.title"></a>
 							</td>
 						</tr>
 						<tr ng-repeat-end class="hidden">

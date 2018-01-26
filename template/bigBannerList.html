@@ -16,7 +16,7 @@
 	</div>
 	<div class="grid_3 grid_4">
 		<div class="col-md-12 page_1">
-			<a href="/admin/renterTemplates#!/website{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
+			<a href="/admin/index.php?/Admin/renterTemplates#!/website{{action.router}}" ng-click="actionClick($event, action.func)" ng-repeat-start="action in data.actions" ng-if="action.type =='head_button' " type="button" class="btn btn-lg btn-default" ng-bind="action.title"></a>
 			<span ng-repeat-end></span>
 		</div>
 		<div class="clearfix"> </div>
@@ -45,7 +45,7 @@
 							<td valign="middle" ng-bind="row.bb_order"></td>
 							<td valign="middle" ng-bind="row.bb_add_datetime"></td>
 							<td valign="middle">
-								<a  ng-repeat-start="action in data.actions" href="/admin/renterTemplates#!/website{{action.router}}/{{row.bb_id}}" ng-click="actionClick($event, action.func)"  ng-if="action.type=='button'" type="button" class="btn btn-xs btn-default" ng-bind="action.title">新增</a>
+								<a  ng-repeat-start="action in data.actions" href="/admin/index.php?/Admin/renterTemplates#!/website{{action.router}}/{{row.bb_id}}" ng-click="actionClick($event, action.func)"  ng-if="action.type=='button'" type="button" class="btn btn-xs btn-default" ng-bind="action.title">新增</a>
 								<span ng-repeat-end></span>
 							</td>
 						</tr>
