@@ -1,27 +1,27 @@
-﻿<script src="/js/jquery/1.9.1/jquery.min.js"></script>
-<script src="/js/jquery.cookie.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/jquery-ui.min.js"></script>
+﻿<script src="/admin/js/jquery/1.9.1/jquery.min.js"></script>
+<script src="/admin/js/jquery.cookie.min.js"></script>
+<script src="/admin/js/bootstrap.min.js"></script>
+<script src="/admin/js/jquery-ui.min.js"></script>
 
-<script type="text/javascript" src="/js/angular/angular.min.js"></script>
-<script type="text/javascript" src="/js/angular/angular-route.min.js"></script>
-<script type="text/javascript" src="/js/angular/angular-cookies.min.js"></script>
+<script type="text/javascript" src="/admin/js/angular/angular.min.js"></script>
+<script type="text/javascript" src="/admin/js/angular/angular-route.min.js"></script>
+<script type="text/javascript" src="/admin/js/angular/angular-cookies.min.js"></script>
 
 
   
 <!-- Mainly scripts -->
-<script src="/js/jquery.metisMenu.js"></script>
-<script src="/js/jquery.slimscroll.min.js"></script>
+<script src="/admin/js/jquery.metisMenu.js"></script>
+<script src="/admin/js/jquery.slimscroll.min.js"></script>
 
 <!-- Custom and plugin javascript -->
-<script src="/js/custom.js"></script>
-<script src="/js/screenfull.js"></script>
+<script src="/admin/js/custom.js"></script>
+<script src="/admin/js/screenfull.js"></script>
 
-<script src="/js/main.js?<{$randseed}>"></script>
+<script src="/admin/js/main.js?<{$randseed}>"></script>
 
 <{if $jsArray}>
 	<{foreach from=$jsArray item=file}>
-		<link rel="stylesheet" href="/js/<{$file}>">
+		<link rel="stylesheet" href="/admin/js/<{$file}>">
 	<{/foreach}>
 <{/if}>
 
