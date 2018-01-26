@@ -2018,7 +2018,7 @@ var apiService = function($http, $cookies)
 				am_id :am_id
 			};
 			var object = $.extend(default_obj, postdata);
-			return $http.post('/Api'+$router+'?sess='+sess, object ,  {headers: {'Content-Type': 'application/json'} });
+			return $http.post('/admin/Api'+$router+'?sess='+sess, object ,  {headers: {'Content-Type': 'application/json'} });
 		}
     };
 }
