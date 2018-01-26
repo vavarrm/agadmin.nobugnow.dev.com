@@ -25,7 +25,7 @@
 					</a>
 					<ul ng-if="root.nodes" class="nav nav-second-level">
 						<li ng-repeat="nodes in root.nodes">
-							<a ng-if="nodes.type=='menu'" ng-click="navclick(nodes.title,root.router,nodes.router,nodes.id);" href="/admin/renterTemplates#!{{root.router}}{{nodes.router}}" target="iframe_a"  class="hvr-bounce-to-right" ng-show="data.selected == root.id" > 
+							<a ng-if="nodes.type=='menu'" ng-click="navclick(nodes.title,root.router,nodes.router,nodes.id);" href="/admin/index.php?/Admin/renterTemplates#!{{root.router}}{{nodes.router}}" target="iframe_a"  class="hvr-bounce-to-right" ng-show="data.selected == root.id" > 
 								<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
 								<i class="fa fa-cog nav_icon "></i>
 								<span ng-bind="nodes.title"></span>
