@@ -51,8 +51,8 @@
 	</div>
 	<{include file='Admin/foot.tpl'}>
 	<!--scrolling js-->
-	<script src="/js/jquery.nicescroll.js"></script>
-	<script src="/js/scripts.js"></script>
+	<script src="/admin/js/jquery.nicescroll.js"></script>
+	<script src="/admin/js/scripts.js"></script>
 	<script>
 		$('input[name=passwd]').keypress(function (event) {
 			if (event.which === 13)
