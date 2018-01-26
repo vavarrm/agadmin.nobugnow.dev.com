@@ -33,9 +33,9 @@
 				<{*banner*}>
 				<div class="banner">
 					<h2 >
-						<a  ng-click="navclick('','','');" href="/admin/renterTemplates#!/home/" target="iframe_a" >Home</a>
+						<a  ng-click="navclick('','','');" href="/admin/index.php?/Admin/renterTemplates#!/" target="iframe_a" >Home</a>
 						<i   ng-show="data.nodes.router" class="fa fa-angle-right"></i>
-						<a  style="color:#999" ng-click="navclick(data.nodes.title,data.root.router,data.nodes.router,data.nodes_id);"   target="iframe_a" href="/admin/renterTemplates#!{{data.root.router}}{{data.nodes.router}}" ng-show="data.nodes" ng-bind="data.nodes.title"></a>
+						<a  style="color:#999" ng-click="navclick(data.nodes.title,data.root.router,data.nodes.router,data.nodes_id);"   target="iframe_a" href="/admin/index.php?/Admin/renterTemplates#!/{{data.root.router}}{{data.nodes.router}}" ng-show="data.nodes" ng-bind="data.nodes.title"></a>
 					</h2>
 					</h2>
 				</div>
