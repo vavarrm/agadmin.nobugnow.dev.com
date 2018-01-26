@@ -1,4 +1,4 @@
-var templatePath = "/template/admin/";
+var templatePath = "/admin/template/";
 var apiRouter ;
 var agApp = angular.module("agApp", ['ngRoute', 'ngCookies']);
 

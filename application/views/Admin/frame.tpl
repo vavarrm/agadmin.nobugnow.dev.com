@@ -48,7 +48,7 @@
 			<{include file='Admin/foot.tpl'}>	
 		</div>
 		<!--scrolling js-->
-		<script src="/js/jquery.nicescroll.js"></script>
+		<script src="/admin/js/jquery.nicescroll.js"></script>
 		<script>
 		
 		</script>
