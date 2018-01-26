@@ -110,7 +110,7 @@
 			
 			 $.ajax({
 				type: "POST",
-				url: '/Api/login',
+				url: '/admin/Api/login',
 				dataType: 'json',
 				async: false,
 				//json object to sent to the authentication url
